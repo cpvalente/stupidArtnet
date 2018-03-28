@@ -1,6 +1,6 @@
 """ Simple Implementation of Artnet.
 
-    21.02.18
+    28.02.18
     Python Version: 3.6
     Source: http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf
 
@@ -8,12 +8,10 @@
     - Artnet should be implemented similarly to sockets
     - ie. there cant be multiple objects on the same port
     - Add some functions for clearing buffer
-    - Test broadcast
-    - Should UDP socket be part of class?
 
     NOTES
     - To make it super simple I have not implemented NET or SUBNET,
-    this are default to 0
+    these default to 0
 
 """
 
@@ -39,7 +37,7 @@ class StupidArtnet():
     _chb = 0x00
 
     def __init__(self):
-        """Iitialize UDP here."""
+        """Initialize UDP here."""
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         pass
 
@@ -56,47 +54,10 @@ class StupidArtnet():
     def setup(self, targetIP='127.0.0.1', universe=0, packet_size=512):
         """Setup class with network information."""
         self.TARGET_IP = targetIP
-        self.UNIVERSE = universe
-        self.PACKET_SIZE = packet_size
-
         self.BUFFER = bytearray(self.PACKET_SIZE)
 
-        self._una = (self.UNIVERSE & 0xFF)
-        self._unb = ((self.UNIVERSE >> 8) & 0xFF)
-
-        self._cha = (self.PACKET_SIZE & 0xFF)
-        self._chb = ((self.PACKET_SIZE >> 8) & 0xFF)
-
-        self.make_header()
-
-    def set_universe(self, universe):
-        """Setter for universe."""
-        self.UNIVERSE = universe
-
-        self._una = (self.UNIVERSE & 0xFF)
-        self._unb = ((self.UNIVERSE >> 8) & 0xFF)
-
-        self.make_header()
-
-    def set_physical(self, physical):
-        """Setter for physical address."""
-        self.PHYSICAL = physical  # not implemented
-
-        self.make_header()
-
-    def set_sequence(self, sequence):
-        """Setter for sequence."""
-        self.SEQUENCE = sequence  # NOT IMPLEMENTED
-
-        self.make_header()
-
-    def set_packet_size(self, packet_size):
-        """Setter for packet size, should restrict."""
-        self.PACKET_SIZE = packet_size
-
-        self._cha = (self.PACKET_SIZE & 0xFF)
-        self._chb = ((self.PACKET_SIZE >> 8) & 0xFF)
-
+        self.set_packet_size(packet_size)
+        self.set_universe(universe)
         self.make_header()
 
     def make_header(self):
@@ -116,57 +77,61 @@ class StupidArtnet():
         # physical port (int 8)
         self.HEADER.append(0x00)
 
-        # add universe (int 16) and packet length (int 16)
-        # packet data in the end (512 x bytes)
+        # 16bit universe
+        self.HEADER.append(self._una)
+        self.HEADER.append(self._unb)
 
-    def clear(self):
-        """Clear DMX buffer."""
-        self.BUFFER = bytearray(self.PACKET_SIZE)
-
-    def blackout(self):
-        """Sends 0's all across"""
-        packet = bytearray(self.PACKET_SIZE)
-
-        self.set(packet)
-        self.show()
-
-    def flash_all(self):
-        """Sends 255's all across"""
-        packet = bytearray(self.PACKET_SIZE)
-        for i in range(self.PACKET_SIZE):
-            packet[i] = 255
-
-        self.set(packet)
-        self.show()
-
-    def set(self, p):
-        """Set buffer."""
-        self.BUFFER = p
+        # 16bit packet size
+        self.HEADER.append(self._cha)
+        self.HEADER.append(self._chb)
 
     def show(self):
         """Finally send data."""
         packet = bytearray()
         packet.extend(self.HEADER)
-
-        # 16bit universe
-        packet.append(self._una)
-        packet.append(self._unb)
-
-        # 16bit packet size
-        packet.append(self._cha)
-        packet.append(self._chb)
-
         packet.extend(self.BUFFER)
 
         self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
 
-    def see_header(self):
-        """Show header values."""
-        return self.HEADER
+    ##
+    # SETTERS
+    ##
 
-    def see_buffer(self):
-        """Show buffer values."""
-        return self.BUFFER
+    def set_universe(self, universe):
+        """Setter for universe."""
+        self.UNIVERSE = universe
+
+        self._una = (self.UNIVERSE & 0xFF)
+        self._unb = ((self.UNIVERSE >> 8) & 0xFF)
+
+        self.make_header()
+
+    def set_packet_size(self, packet_size):
+        """Setter for packet size, should restrict."""
+        self.PACKET_SIZE = packet_size
+
+        self._cha = (self.PACKET_SIZE & 0xFF)
+        self._chb = ((self.PACKET_SIZE >> 8) & 0xFF)
+
+        self.make_header()
+
+    def set_physical(self, physical):
+        """Setter for physical address."""
+        self.PHYSICAL = physical  # not implemented
+        self.make_header()
+
+    def set_sequence(self, sequence):
+        """Setter for sequence."""
+        self.SEQUENCE = sequence  # NOT IMPLEMENTED
+        self.make_header()
+
+    def clear(self):
+        """Clear DMX buffer."""
+        self.BUFFER = bytearray(self.PACKET_SIZE)
+
+    def set(self, p):
+        """Set buffer."""
+        self.BUFFER = p
 
     def set_single_value(self, address, value):
         """Set single value in DMX buffer."""
@@ -188,3 +153,31 @@ class StupidArtnet():
         self.BUFFER[address - 1] = r
         self.BUFFER[address] = g
         self.BUFFER[address + 1] = b
+
+    ##
+    # AUX
+    ##
+
+    def see_header(self):
+        """Show header values."""
+        return self.HEADER
+
+    def see_buffer(self):
+        """Show buffer values."""
+        return self.BUFFER
+
+    def blackout(self):
+        """Sends 0's all across"""
+        packet = bytearray(self.PACKET_SIZE)
+
+        self.set(packet)
+        self.show()
+
+    def flash_all(self):
+        """Sends 255's all across"""
+        packet = bytearray(self.PACKET_SIZE)
+        for i in range(self.PACKET_SIZE):
+            packet[i] = 255
+
+        self.set(packet)
+        self.show()
