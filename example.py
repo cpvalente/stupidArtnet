@@ -2,9 +2,9 @@ from lib.StupidArtnet import StupidArtnet
 import time
 
 # THESE ARE MOST LIKELY THE VALUES YOU WILL BE NEEDING
-target_ip = '127.0.0.1'  # localhost for testing, Artnet IPs typically on the 2.x or 10.x range
-universe = 1            # see docs
-packet_size = 100       # it is not necessary to send whole universe
+target_ip = '127.0.0.1'     # localhost for testing, typically in 2.x or 10.x range
+universe = 0                # see docs
+packet_size = 100           # it is not necessary to send whole universe
 
 # CREATING A STUPID ARTNET OBJECT
 a = StupidArtnet()
@@ -29,10 +29,14 @@ packet = bytearray(packet_size)  # create packet for Artnet
 for i in range(packet_size):     # fill packet with sequential values
     packet[i] = (i % 256)
 
-a.send(packet)                  # send packet
+# SET THE ARTNET BUFFER TO OUR DATA ...
+a.set(packet)                   # only on changes
+a.set_single_value(1, 255)
+
+# ... AND SEND
+a.show()
 
 # OR USE STUPIDARTNET FUNCTIONS
-
 for i in range(10):
     a.flash_all()       # set all to high
     time.sleep(100)     # wait

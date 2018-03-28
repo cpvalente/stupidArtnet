@@ -29,6 +29,8 @@ class StupidArtnet():
     PACKET_SIZE = 512
     PHYSICAL = 0
     SEQUENCE = 0
+    HEADER = bytearray()
+    BUFFER = bytearray()
 
     _una = 0x00
     _unb = 0x00
@@ -57,11 +59,15 @@ class StupidArtnet():
         self.UNIVERSE = universe
         self.PACKET_SIZE = packet_size
 
+        self.BUFFER = bytearray(self.PACKET_SIZE)
+
         self._una = (self.UNIVERSE & 0xFF)
         self._unb = ((self.UNIVERSE >> 8) & 0xFF)
 
         self._cha = (self.PACKET_SIZE & 0xFF)
         self._chb = ((self.PACKET_SIZE >> 8) & 0xFF)
+
+        self.make_header()
 
     def set_universe(self, universe):
         """Setter for universe."""
@@ -70,13 +76,19 @@ class StupidArtnet():
         self._una = (self.UNIVERSE & 0xFF)
         self._unb = ((self.UNIVERSE >> 8) & 0xFF)
 
+        self.make_header()
+
     def set_physical(self, physical):
         """Setter for physical address."""
         self.PHYSICAL = physical  # not implemented
 
+        self.make_header()
+
     def set_sequence(self, sequence):
         """Setter for sequence."""
         self.SEQUENCE = sequence  # NOT IMPLEMENTED
+
+        self.make_header()
 
     def set_packet_size(self, packet_size):
         """Setter for packet size, should restrict."""
@@ -85,34 +97,38 @@ class StupidArtnet():
         self._cha = (self.PACKET_SIZE & 0xFF)
         self._chb = ((self.PACKET_SIZE >> 8) & 0xFF)
 
+        self.make_header()
+
     def make_header(self):
         """Setter for universe."""
-        # DMX Header
-        header = bytearray()
-
         # id (8 x bytes)
-        header.extend(bytearray('Art-Net', 'utf8'))
-        header.append(0x0)
+        self.HEADER = bytearray()
+        self.HEADER.extend(bytearray('Art-Net', 'utf8'))
+        self.HEADER.append(0x0)
         # opcode low byte first  (int 16)
-        header.append(0x00)
-        header.append(0x50)  # ArtDmx data packet
+        self.HEADER.append(0x00)
+        self.HEADER.append(0x50)  # ArtDmx data packet
         # proto ver high byte first (int 16)
-        header.append(0x0)
-        header.append(14)
+        self.HEADER.append(0x0)
+        self.HEADER.append(14)
         # sequence (int 8), not implemented
-        header.append(0x00)
+        self.HEADER.append(0x00)
         # physical port (int 8)
-        header.append(0x00)
+        self.HEADER.append(0x00)
 
         # add universe (int 16) and packet length (int 16)
         # packet data in the end (512 x bytes)
-        return header
+
+    def clear(self):
+        """Clear DMX buffer."""
+        self.BUFFER = bytearray(self.PACKET_SIZE)
 
     def blackout(self):
         """Sends 0's all across"""
         packet = bytearray(self.PACKET_SIZE)
 
-        self.send(packet)
+        self.set(packet)
+        self.show()
 
     def flash_all(self):
         """Sends 255's all across"""
@@ -120,11 +136,17 @@ class StupidArtnet():
         for i in range(self.PACKET_SIZE):
             packet[i] = 255
 
-        self.send(packet)
+        self.set(packet)
+        self.show()
 
-    def send(self, p):
+    def set(self, p):
+        """Set buffer."""
+        self.BUFFER = p
+
+    def show(self):
         """Finally send data."""
-        packet = self.make_header()
+        packet = bytearray()
+        packet.extend(self.HEADER)
 
         # 16bit universe
         packet.append(self._una)
@@ -134,6 +156,35 @@ class StupidArtnet():
         packet.append(self._cha)
         packet.append(self._chb)
 
-        packet.extend(p)
+        packet.extend(self.BUFFER)
 
         self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
+
+    def see_header(self):
+        """Show header values."""
+        return self.HEADER
+
+    def see_buffer(self):
+        """Show buffer values."""
+        return self.BUFFER
+
+    def set_single_value(self, address, value):
+        """Set single value in DMX buffer."""
+        if address < 1 or address > 512:
+            return
+        self.BUFFER[address - 1] = value
+
+    def set_single_rem(self, address, value):
+        """Set single value while blacking out others"""
+        if address < 1 or address > 512:
+            return
+        self.BUFFER = bytearray(self.PACKET_SIZE)
+        self.BUFFER[address - 1] = value
+
+    def set_rgb(self, address, r, g, b):
+        """Set RGB from start address."""
+        if address < 1 or address > 510:
+            return
+        self.BUFFER[address - 1] = r
+        self.BUFFER[address] = g
+        self.BUFFER[address + 1] = b
