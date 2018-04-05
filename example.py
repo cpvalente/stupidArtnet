@@ -2,9 +2,9 @@ from lib.StupidArtnet import StupidArtnet
 import time
 
 # THESE ARE MOST LIKELY THE VALUES YOU WILL BE NEEDING
-target_ip = '127.0.0.1'     # localhost for testing, typically in 2.x or 10.x range
-universe = 0                # see docs
-packet_size = 100           # it is not necessary to send whole universe
+target_ip = '192.168.1.10'		# typically in 2.x or 10.x range
+universe = 0 					# see docs
+packet_size = 100				# it is not necessary to send whole universe
 
 # CREATING A STUPID ARTNET OBJECT
 a = StupidArtnet()
@@ -23,23 +23,26 @@ a.setup(target_ip, universe, packet_size)
 # CHECK INIT
 print(a)
 
-# YOU CAN CREATE YOUR OWN BYTE ARRAY
-# OF PACKET_SIZE AND SEND IT
-packet = bytearray(packet_size)  # create packet for Artnet
-for i in range(packet_size):     # fill packet with sequential values
+# YOU CAN CREATE YOUR OWN BYTE ARRAY OF PACKET_SIZE
+packet = bytearray(packet_size)		# create packet for Artnet
+for i in range(packet_size):		# fill packet with sequential values
     packet[i] = (i % 256)
 
-# SET THE ARTNET BUFFER TO OUR DATA ...
-a.set(packet)                   # only on changes
+# ... AND SET IT TO STUPID ARTNET
+a.set(packet)						# only on changes
+
+# ALL PACKETS ARE SAVED IN THE CLASS, YOU CAN CHANGE SINGLE VALUES
 a.set_single_value(1, 255)
 
 # ... AND SEND
 a.show()
 
 # OR USE STUPIDARTNET FUNCTIONS
-for i in range(10):
-    a.flash_all()       # set all to high
-    time.sleep(100)     # wait
+a.flash_all()
 
-    a.blackout()        # set all to low
-    time.sleep(100)     # wait
+time.sleep(1)						# wait a bit
+
+a.blackout()
+
+# CLOSE THE SOCKET IN THE END, JUST TO BE SURE
+a.close()
