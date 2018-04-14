@@ -2,6 +2,8 @@
 
 (Very) Simple Artnet implementation in Python
 
+### Usage
+
 ### Notes
 
 Artnet libraries tend to be complicated and hard to get off the ground. Sources were either too simple and didn't explain the workings or become too complex by fully implementing the protocol. <br />
