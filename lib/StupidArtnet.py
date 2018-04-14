@@ -11,33 +11,38 @@
 
 """
 
-import socket       # how to stop this from being imported twice?
-
+import time
+from threading import Timer
+import random	# testing only
 
 class StupidArtnet():
 	"""(Very) simple implementation of Artnet."""
-
 	UDP_PORT = 6454
-	TARGET_IP = '127.0.0.1'
 
-	SEQUENCE = 0
-	PHYSICAL = 0
-	UNIVERSE = 0
-	NET = 0
-	PACKET_SIZE = 512
-	HEADER = bytearray()
-	BUFFER = bytearray()
+	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30):
+		"""Class Initialization."""
+		# Instance variables
+		self.TARGET_IP = targetIP
+		#self.SEQUENCE = 0		# not implemented
+		self.PHYSICAL = 0
+		self.UNIVERSE = universe
+		self.NET = 0
+		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512)
+		self.HEADER = bytearray()
+		self.BUFFER = bytearray(packet_size)
+		self._unL = 0x00
+		self._unH = 0x00
+		self._chL = 0x00
+		self._chH = 0x00
 
-	_unL = 0x00
-	_unH = 0x00
-
-	_chL = 0x00
-	_chH = 0x00
-
-	def __init__(self):
-		"""Initialize UDP here."""
+		# UDP SOCKET
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		pass
+
+		# Timer
+		self.fps = fps
+
+		self.make_header()
+
 
 	def __str__(self):
 		"""Printable object state."""
@@ -48,14 +53,6 @@ class StupidArtnet():
 		s += "Packet Size: %i \n" % self.PACKET_SIZE
 
 		return s
-
-	def setup(self, targetIP='127.0.0.1', universe=0, packet_size=512):
-		"""Setup class with network information."""
-		self.TARGET_IP = targetIP
-		self.UNIVERSE = universe
-		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512)
-		self.make_header()
-		self.BUFFER = bytearray(self.PACKET_SIZE)
 
 	def make_header(self):
 		"""Setter for universe."""
@@ -75,7 +72,7 @@ class StupidArtnet():
 		# physical port (int 8)
 		self.HEADER.append(0x00)
 		# 16bit universe, low bite first
-		# not quite, good enough for now
+		# not quite correct but good enough for now
 		v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
 		self.HEADER.append(v[1])
 		self.HEADER.append(v[0])
@@ -91,11 +88,28 @@ class StupidArtnet():
 		packet.extend(self.HEADER)
 		packet.extend(self.BUFFER)
 		# self.SEQUENCE = (self.SEQUENCE + 1) % 256 # Not implemented
-		self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
+		try:
+			self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
+		except Exception as e:
+			print("ERROR: Socket error with exception: %s" % e)
 
 	def close(self):
 		"""Close UDP socket."""
 		self.s.close()
+
+	##
+	# THREADING
+	##
+
+	def start(self):
+		"""."""
+		self.show()
+		self.__clock = Timer((1000.0 / self.fps) / 1000.0, self.start)
+		self.__clock.start()
+
+	def stop(self):
+		"""."""
+		self.__clock.cancel()
 
 	##
 	# SETTERS - HEADER
@@ -107,7 +121,6 @@ class StupidArtnet():
 		v = self.shift_this(self.UNIVERSE)
 		self._unL = v[1]
 		self._unH = v[0]
-
 		self.make_header()
 
 	def set_packet_size(self, packet_size):
@@ -177,11 +190,11 @@ class StupidArtnet():
 
 	def see_header(self):
 		"""Show header values."""
-		return self.HEADER
+		print(self.HEADER)
 
 	def see_buffer(self):
 		"""Show buffer values."""
-		return self.BUFFER
+		print(self.BUFFER)
 
 	def blackout(self):
 		"""Sends 0's all across"""
@@ -222,3 +235,32 @@ class StupidArtnet():
 		if (number > range_max):
 			number = range_max
 		return number
+
+
+if __name__ == '__main__':
+	print("===================================")
+	print("Namespace run")
+
+	target_ip = '192.168.2.3'		# typically in 2.x or 10.x range
+	universe = 0 					# see docs
+	packet_size = 20				# it is not necessary to send whole universe
+	packet = bytearray(packet_size)
+	a = StupidArtnet(target_ip, universe, packet_size)
+	print(a)
+
+	print("Start sending")
+
+	a.start()
+
+	count = 0
+	for x in range(100):
+		for i in range(packet_size):
+			packet[i] = random.randint(0, 255)
+		a.set(packet)
+		count = count + 1
+		time.sleep(.2)
+
+	a.stop()
+
+	print("Stop sending")
+	a.close()
