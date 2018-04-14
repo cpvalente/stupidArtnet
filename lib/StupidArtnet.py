@@ -11,6 +11,7 @@
 
 """
 
+import socket
 import time
 from threading import Timer
 import random	# testing only
