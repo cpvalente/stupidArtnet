@@ -47,7 +47,7 @@ a.blackout()						# send single packet with all channels at 0
 # ALL THE ABOVE EXAMPLES SEND A SINGLE DATAPACKET
 # STUPIDARTNET IS ALSO THREADABLE
 # TO SEND PERSISTANT SIGNAL YOU CAN START THE THREAD
-a.start()														# start continuos sendin
+a.start()							# start continuos sendin
 
 # AND MODIFY THE DATA AS YOU GO
 for x in range(100):
@@ -55,6 +55,7 @@ for x in range(100):
 		packet[i] = random.randint(0, 255)
 	a.set(packet)
 	time.sleep(.2)
+
 # ... REMEMBER TO CLOSE THE THREAD ONCE YOU ARE DONE
 a.stop()
 

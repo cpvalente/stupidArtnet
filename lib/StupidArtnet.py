@@ -1,30 +1,28 @@
-""" Simple Implementation of Artnet.
+"""Simple Implementation of Artnet.
 
-	06.04.18
-	Python Version: 3.6
-	Source: http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf
-			http://art-net.org.uk/wordpress/structure/streaming-packets/artdmx-packet-definition/
+Python Version: 3.6
+Source: http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf
+		http://art-net.org.uk/wordpress/structure/streaming-packets/artdmx-packet-definition/
 
-	NOTES
-	- To make it super simple I have not implemented NET or SUBNET,
-	these default to 0
+NOTES
+- For simplicity: Did not implement NET or SUBNET, these default to 0
 
 """
 
 import socket
-import time
 from threading import Timer
-import random	# testing only
+
 
 class StupidArtnet():
 	"""(Very) simple implementation of Artnet."""
+
 	UDP_PORT = 6454
 
 	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30):
 		"""Class Initialization."""
 		# Instance variables
 		self.TARGET_IP = targetIP
-		#self.SEQUENCE = 0		# not implemented
+		# self.SEQUENCE = 0		# not implemented
 		self.PHYSICAL = 0
 		self.UNIVERSE = universe
 		self.NET = 0
@@ -44,7 +42,6 @@ class StupidArtnet():
 
 		self.make_header()
 
-
 	def __str__(self):
 		"""Printable object state."""
 		s = "==================================="
@@ -57,28 +54,27 @@ class StupidArtnet():
 
 	def make_header(self):
 		"""Setter for universe."""
-		# 0 - id (8 x bytes)
+		# 0 - id (7 x bytes + Null)
 		self.HEADER = bytearray()
 		self.HEADER.extend(bytearray('Art-Net', 'utf8'))
 		self.HEADER.append(0x0)
-		# 8 - opcode low byte first  (int 16)
+		# 8 - opcode (2 x 8 low byte first)
 		self.HEADER.append(0x00)
 		self.HEADER.append(0x50)  # ArtDmx data packet
-		# 10 - proto ver high byte first (int 16)
+		# 10 - prototocol version (2 x 8 high byte first)
 		self.HEADER.append(0x0)
 		self.HEADER.append(14)
-		# 10 - sequence (int 8), not implemented
+		# 12 - sequence (int 8), NULL for not implemented
 		# self.HEADER.append(self.SEQUENCE)
 		self.HEADER.append(0x00)
-		# physical port (int 8)
+		# 13 - physical port (int 8)
 		self.HEADER.append(0x00)
-		# 16bit universe, low bite first
+		# 14 - universe, (2 x 8 low byte first)
 		# not quite correct but good enough for now
 		v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
 		self.HEADER.append(v[1])
 		self.HEADER.append(v[0])
-
-		# 16bit packet size, high byte first
+		# 16 - packet size (2 x 8 high byte first)
 		v = self.shift_this(self.PACKET_SIZE)		# convert to MSB / LSB
 		self.HEADER.append(v[0])
 		self.HEADER.append(v[1])
@@ -171,7 +167,7 @@ class StupidArtnet():
 		self.BUFFER[address - 1] = value
 
 	def set_single_rem(self, address, value):
-		"""Set single value while blacking out others"""
+		"""Set single value while blacking out others."""
 		if address < 1 or address > 512:
 			return
 		self.clear()
@@ -182,7 +178,7 @@ class StupidArtnet():
 		if address < 1 or address > 510:
 			return
 		self.BUFFER[address - 1] = r
-		self.BUFFER[address    ] = g
+		self.BUFFER[address] = g
 		self.BUFFER[address + 1] = b
 
 	##
@@ -198,12 +194,12 @@ class StupidArtnet():
 		print(self.BUFFER)
 
 	def blackout(self):
-		"""Sends 0's all across"""
+		"""Sends 0's all across."""
 		self.clear()
 		self.show()
 
 	def flash_all(self):
-		"""Sends 255's all across"""
+		"""Sends 255's all across."""
 		packet = bytearray(self.PACKET_SIZE)
 		for i in range(self.PACKET_SIZE):
 			packet[i] = 255
@@ -216,9 +212,9 @@ class StupidArtnet():
 
 	@staticmethod
 	def shift_this(number, high_first=True):
-		"Utility method: extracts MSB and LSB from number"
-		low 	= (number & 0xFF)
-		high 	= ((number >> 8) & 0xFF)
+		"""Utility method: extracts MSB and LSB from number."""
+		low = (number & 0xFF)
+		high = ((number >> 8) & 0xFF)
 		if (high_first):
 			return((high, low))
 		else:
@@ -228,7 +224,7 @@ class StupidArtnet():
 
 	@staticmethod
 	def put_in_range(number, range_min, range_max, make_even=True):
-		"Utility method: sets number in defined range."
+		"""Utility method: sets number in defined range."""
 		if (make_even and number % 2 != 0):
 			number += 1
 		if (number < range_min):
@@ -239,10 +235,13 @@ class StupidArtnet():
 
 
 if __name__ == '__main__':
+	import random		# testing only
+	import time
+
 	print("===================================")
 	print("Namespace run")
 
-	target_ip = '192.168.2.3'		# typically in 2.x or 10.x range
+	target_ip = '127.0.0.1'			# typically in 2.x or 10.x range
 	universe = 0 					# see docs
 	packet_size = 20				# it is not necessary to send whole universe
 	packet = bytearray(packet_size)
