@@ -160,6 +160,13 @@ class StupidArtnet():
 			return
 		self.BUFFER = p
 
+	def set_16bit(self, address, value):
+		"""Set single 16bit value in DMX buffer."""
+		if address < 1 or address > 512 - 1:
+			return
+		self.BUFFER[address - 1] = (value) & 0xFF
+		self.BUFFER[address] = (value >> 8) & 0xFF
+
 	def set_single_value(self, address, value):
 		"""Set single value in DMX buffer."""
 		if address < 1 or address > 512:
