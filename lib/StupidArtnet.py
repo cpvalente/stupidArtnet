@@ -5,7 +5,7 @@ Source: http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf
 		http://art-net.org.uk/wordpress/structure/streaming-packets/artdmx-packet-definition/
 
 NOTES
-- For simplicity: Did not implement NET or SUBNET, these default to 0
+- For simplicity: NET and SUBNET not implemented by default but optional
 
 """
 
@@ -22,17 +22,15 @@ class StupidArtnet():
 		"""Class Initialization."""
 		# Instance variables
 		self.TARGET_IP = targetIP
-		# self.SEQUENCE = 0		# not implemented
+		self.SEQUENCE = 0
 		self.PHYSICAL = 0
 		self.UNIVERSE = universe
 		self.NET = 0
 		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512)
 		self.HEADER = bytearray()
 		self.BUFFER = bytearray(packet_size)
-		self._unL = 0x00
-		self._unH = 0x00
-		self._chL = 0x00
-		self._chH = 0x00
+
+		self.bIsSimplified = True		# simplify use of universe, net and subnet
 
 		# UDP SOCKET
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -53,7 +51,7 @@ class StupidArtnet():
 		return s
 
 	def make_header(self):
-		"""Setter for universe."""
+		"""Make packet header."""
 		# 0 - id (7 x bytes + Null)
 		self.HEADER = bytearray()
 		self.HEADER.extend(bytearray('Art-Net', 'utf8'))
@@ -65,15 +63,17 @@ class StupidArtnet():
 		self.HEADER.append(0x0)
 		self.HEADER.append(14)
 		# 12 - sequence (int 8), NULL for not implemented
-		# self.HEADER.append(self.SEQUENCE)
-		self.HEADER.append(0x00)
+		self.HEADER.append(self.SEQUENCE)
 		# 13 - physical port (int 8)
 		self.HEADER.append(0x00)
 		# 14 - universe, (2 x 8 low byte first)
-		# not quite correct but good enough for now
-		v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
-		self.HEADER.append(v[1])
-		self.HEADER.append(v[0])
+		if (self.bIsSimplified):
+			# not quite correct but good enough for some cases
+			v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
+			self.HEADER.append(v[1])
+			self.HEADER.append(v[0])
+		else:
+			pass									# not yet
 		# 16 - packet size (2 x 8 high byte first)
 		v = self.shift_this(self.PACKET_SIZE)		# convert to MSB / LSB
 		self.HEADER.append(v[0])
@@ -84,7 +84,7 @@ class StupidArtnet():
 		packet = bytearray()
 		packet.extend(self.HEADER)
 		packet.extend(self.BUFFER)
-		# self.SEQUENCE = (self.SEQUENCE + 1) % 256 # Not implemented
+		self.SEQUENCE = (self.SEQUENCE + 1) % 256 	# Not implemented
 		try:
 			self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
 		except Exception as e:
@@ -115,34 +115,27 @@ class StupidArtnet():
 	def set_universe(self, universe):
 		"""Setter for universe."""
 		self.UNIVERSE = universe
-		v = self.shift_this(self.UNIVERSE)
-		self._unL = v[1]
-		self._unH = v[0]
 		self.make_header()
 
 	def set_packet_size(self, packet_size):
 		"""Setter for packet size."""
 		self.PACKET_SIZE = packet_size
-		v = self.shift_this(self.UNIVERSE)
-		self._chL = v[1]
-		self._chH = v[0]
-
 		self.make_header()
 
 	def set_physical(self, physical):
 		"""Setter for physical address.
 
-		Not implemented
+		Set simplify to false to use
 		"""
-		self.PHYSICAL = physical  # not implemented
+		self.PHYSICAL = physical
 		self.make_header()
 
 	def set_net(self, net):
 		"""Setter for net address.
 
-		Not implemented
+		Set simplify to false to use
 		"""
-		self.NET = net  # not implemented
+		self.NET = net
 		self.make_header()
 
 	##
@@ -164,8 +157,8 @@ class StupidArtnet():
 		"""Set single 16bit value in DMX buffer."""
 		if address < 1 or address > 512 - 1:
 			return
-		self.BUFFER[address - 1] = (value) & 0xFF
-		self.BUFFER[address] = (value >> 8) & 0xFF
+		self.BUFFER[address - 1] = (value) & 0xFF		# low
+		self.BUFFER[address] = (value >> 8) & 0xFF		# high
 
 	def set_single_value(self, address, value):
 		"""Set single value in DMX buffer."""
@@ -191,6 +184,18 @@ class StupidArtnet():
 	##
 	# AUX
 	##
+
+	def set_simplified(self, bDoSimplify):
+		"""Builds Header accordingly.
+
+		True - Header sends 16 bit universe value (OK but incorrect)
+		False - Headers sends Universe - Net and Subnet values as protocol
+		It is recommended that you set these values with .set_net() and set_physical
+		"""
+		if (bDoSimplify == self.bIsSimplified):
+			return
+		self.bIsSimplified = bDoSimplify
+		self.make_header()
 
 	def see_header(self):
 		"""Show header values."""
@@ -242,32 +247,20 @@ class StupidArtnet():
 
 
 if __name__ == '__main__':
-	import random		# testing only
-	import time
-
 	print("===================================")
 	print("Namespace run")
 
-	target_ip = '127.0.0.1'			# typically in 2.x or 10.x range
+	target_ip = '2.0.2.2'			# typically in 2.x or 10.x range
 	universe = 0 					# see docs
 	packet_size = 20				# it is not necessary to send whole universe
 	packet = bytearray(packet_size)
 	a = StupidArtnet(target_ip, universe, packet_size)
 	print(a)
 
-	print("Start sending")
-
-	a.start()
-
-	count = 0
-	for x in range(100):
-		for i in range(packet_size):
-			packet[i] = random.randint(0, 255)
-		a.set(packet)
-		count = count + 1
-		time.sleep(.2)
-
-	a.stop()
-
-	print("Stop sending")
+	print("Sending values")
+	a.set_single_value(13, 255)
+	a.set_single_value(14, 100)
+	a.set_single_value(15, 200)
+	a.show()
+	print("Values sent")
 	a.close()

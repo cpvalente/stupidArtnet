@@ -16,7 +16,6 @@ packet_size = 100				# it is not necessary to send whole universe
 a = StupidArtnet(target_ip, universe, packet_size)
 
 # MORE ADVANCED CAN BE SET WITH SETTERS IF NEEDED
-# SEQUENCE    = DEFAULT 0
 # NET         = DEFAULT 0
 # SUBNET      = DEFAULT 0
 
@@ -51,7 +50,7 @@ a.start()							# start continuos sendin
 
 # AND MODIFY THE DATA AS YOU GO
 for x in range(100):
-	for i in range(packet_size):	# Fill buffer with random stuff
+	for i in range(packet_size):  	# Fill buffer with random stuff
 		packet[i] = random.randint(0, 255)
 	a.set(packet)
 	time.sleep(.2)
