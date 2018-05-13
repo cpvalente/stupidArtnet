@@ -25,6 +25,7 @@ class StupidArtnet():
 		self.SEQUENCE = 0
 		self.PHYSICAL = 0
 		self.UNIVERSE = universe
+		self.SUB = 0
 		self.NET = 0
 		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512)
 		self.HEADER = bytearray()
@@ -46,6 +47,9 @@ class StupidArtnet():
 		s = "Stupid Artnet initialized\n"
 		s += "Target IP: %s:%i \n" % (self.TARGET_IP, self.UDP_PORT)
 		s += "Universe: %i \n" % self.UNIVERSE
+		if not (self.bIsSimplified):
+			s += "Subnet: %i \n" % self.SUB
+			s += "Net: %i \n" % self.NET
 		s += "Packet Size: %i \n" % self.PACKET_SIZE
 
 		return s
@@ -68,12 +72,24 @@ class StupidArtnet():
 		self.HEADER.append(0x00)
 		# 14 - universe, (2 x 8 low byte first)
 		if (self.bIsSimplified):
-			# not quite correct but good enough for some cases
+			# not quite correct but good enough for most cases
+			# the whole net subnet is simplified
+			# by transforming a single uint16 into its 8 bit parts
+			# you will most likely not see any differences in small networks
 			v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
 			self.HEADER.append(v[1])
 			self.HEADER.append(v[0])
 		else:
-			pass									# not yet
+			# as specified in artnet 4, remember to set the value manually after
+			# Bit 3-0: Universe (1-16)
+			# Bit 7-4 = Subnet (1-16)
+			# Bit 14-8 = Net (1-128)
+			# Bit 15 = 0
+			# this means 16 * 16 * 128 = 32768 universes per port
+			# a subnet is a group of 16 Universes
+			# 16 subnets will make a net, there are 128 of them
+			self.HEADER.append(self.SUB << 4 | self.UNIVERSE)
+			self.HEADER.append(self.NET)
 		# 16 - packet size (2 x 8 high byte first)
 		v = self.shift_this(self.PACKET_SIZE)		# convert to MSB / LSB
 		self.HEADER.append(v[0])
@@ -113,29 +129,29 @@ class StupidArtnet():
 	##
 
 	def set_universe(self, universe):
-		"""Setter for universe."""
-		self.UNIVERSE = universe
+		"""Setter for universe (0 - 15)."""
+		self.UNIVERSE = self.put_in_range(universe, 0, 15, False)
 		self.make_header()
 
-	def set_packet_size(self, packet_size):
-		"""Setter for packet size."""
-		self.PACKET_SIZE = packet_size
-		self.make_header()
-
-	def set_physical(self, physical):
-		"""Setter for physical address.
+	def set_subnet(self, sub):
+		"""Setter for subnet address (0 - 15).
 
 		Set simplify to false to use
 		"""
-		self.PHYSICAL = physical
+		self.SUB = self.put_in_range(sub, 0, 15, False)
 		self.make_header()
 
 	def set_net(self, net):
-		"""Setter for net address.
+		"""Setter for net address (0 - 127).
 
 		Set simplify to false to use
 		"""
-		self.NET = net
+		self.NET = self.put_in_range(net, 0, 127, False)
+		self.make_header()
+
+	def set_packet_size(self, packet_size):
+		"""Setter for packet size (2 - 512, even only)."""
+		self.PACKET_SIZE = put_in_range(packet_size, 2, 512, True)
 		self.make_header()
 
 	##
@@ -155,6 +171,9 @@ class StupidArtnet():
 
 	def set_16bit(self, address, value):
 		"""Set single 16bit value in DMX buffer."""
+		if address > self.PACKET_SIZE:
+			print("ERROR: Address given greater than defined packet size")
+			return
 		if address < 1 or address > 512 - 1:
 			return
 		self.BUFFER[address - 1] = (value) & 0xFF		# low
@@ -162,12 +181,18 @@ class StupidArtnet():
 
 	def set_single_value(self, address, value):
 		"""Set single value in DMX buffer."""
+		if address > self.PACKET_SIZE:
+			print("ERROR: Address given greater than defined packet size")
+			return
 		if address < 1 or address > 512:
 			return
 		self.BUFFER[address - 1] = value
 
 	def set_single_rem(self, address, value):
 		"""Set single value while blacking out others."""
+		if address > self.PACKET_SIZE:
+			print("ERROR: Address given greater than defined packet size")
+			return
 		if address < 1 or address > 512:
 			return
 		self.clear()
@@ -175,6 +200,9 @@ class StupidArtnet():
 
 	def set_rgb(self, address, r, g, b):
 		"""Set RGB from start address."""
+		if address > self.PACKET_SIZE:
+			print("ERROR: Address given greater than defined packet size")
+			return
 		if address < 1 or address > 510:
 			return
 		self.BUFFER[address - 1] = r
@@ -249,18 +277,24 @@ class StupidArtnet():
 if __name__ == '__main__':
 	print("===================================")
 	print("Namespace run")
-
 	target_ip = '2.0.2.2'			# typically in 2.x or 10.x range
 	universe = 0 					# see docs
 	packet_size = 20				# it is not necessary to send whole universe
 	packet = bytearray(packet_size)
+
 	a = StupidArtnet(target_ip, universe, packet_size)
+	a.set_simplified(False)
+	a.set_net(0)
+	a.set_subnet(0)
+
 	print(a)
 
-	print("Sending values")
 	a.set_single_value(13, 255)
 	a.set_single_value(14, 100)
 	a.set_single_value(15, 200)
+
+	print("Sending values")
 	a.show()
 	print("Values sent")
+
 	a.close()
