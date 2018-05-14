@@ -78,19 +78,51 @@ I have filled the data to represent a ArtDmx packet
 | 6      | t      | "            |
 | 7      | 0x00   | "            |
 | 8      | 0x00   | OpCode Low   |
-| 9      | 0x500  | OpCode High  |
+| 9      | 0x500  | OpCode High  (ArtDmx)         |
 | 10     | 0x00   | Protocol V High               |
 | 11     | 14     | Protocol V Low (currently 14) |
 | 12     | 0x00   | Sequence** (0x00 to disable)  |
 | 13     | int 8  | Physical     |
-| 14     | int 8  | Universe Low***               |
-| 15     | int 8  | Universe High***              |
-| 16     | int 8  | Lenght High (typically 512)   |
-| 17     | int 8  | Lenght Low   |
+| 14     | int 8  | Sub + Uni ***                 |
+| 15     | int 8  | Net ***      |
+| 16     | int 8  | Length High (typically 512)   |
+| 17     | int 8  | Length Low   |
 | -      | -      | Append your packet here       |
 
 ** To allow the receiver to ensure packets are received in the right order <br />
-*** Technically these is incorrect, Artnet uses the concept of Universes and Subnets for data routing. I simplified here
+*** By spec should look like this:
+| Bit 15   | Bits 14-8  | Bits 7-4  | Bits 3-0  |
+| :------- | :--------- | :-------- | :-------- |
+| 0        | Net        | Subnet    | Universe  |
+
+### Nets and Subnets
+
+Artnet uses the concept of Universes and Subnets for data routing. I simplified here defaulting to use a 256 value universe. This will then be divided into low and high uint8 and look correct either way (Universe 17 will be Universe 1 of Subnet 2). In this case the net will always be 0.
+This will look correct and behave fine for smaller networks, wanting to be able to specify Universes, Subnets and Nets you can disable simplification and give values as needed. <br />
+The spec for Artnet 4 applies here: 128 Nets contain 16 Subnets which contain 16 Universes. 128 * 16 * 16 = 32 768 Universes
+
+```
+# Create a StupidArtnet instance with the relevant values
+
+# By default universe is simplified to a value between 0 - 255
+# on sending universe will be masked to two values
+# making the use of subnets invisible
+
+universe = 17
+a = StupidArtnet(target_ip, universe, packet_size)
+
+
+#############################################
+
+# You can also disable simplification
+a.set_simplified(False)
+
+# Add net and subnet value
+# Values here are 0 based
+a.universe(15)
+a.set_subnet(15)
+a.set_net(127)
+```
 
 ### License
 

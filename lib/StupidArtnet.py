@@ -1,11 +1,11 @@
-"""Simple Implementation of Artnet.
+"""(Very) Simple Implementation of Artnet.
 
 Python Version: 3.6
 Source: http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf
 		http://art-net.org.uk/wordpress/structure/streaming-packets/artdmx-packet-definition/
 
 NOTES
-- For simplicity: NET and SUBNET not implemented by default but optional
+- For simplicity: NET and SUBNET not used by default but optional
 
 """
 
@@ -43,14 +43,15 @@ class StupidArtnet():
 
 	def __str__(self):
 		"""Printable object state."""
-		s = "==================================="
-		s = "Stupid Artnet initialized\n"
+		s = "===================================\n"
+		s += "Stupid Artnet initialized\n"
 		s += "Target IP: %s:%i \n" % (self.TARGET_IP, self.UDP_PORT)
 		s += "Universe: %i \n" % self.UNIVERSE
 		if not (self.bIsSimplified):
 			s += "Subnet: %i \n" % self.SUB
 			s += "Net: %i \n" % self.NET
 		s += "Packet Size: %i \n" % self.PACKET_SIZE
+		s += "==================================="
 
 		return s
 
@@ -72,24 +73,26 @@ class StupidArtnet():
 		self.HEADER.append(0x00)
 		# 14 - universe, (2 x 8 low byte first)
 		if (self.bIsSimplified):
-			# not quite correct but good enough for most cases
+			# not quite correct but good enough for most cases:
 			# the whole net subnet is simplified
 			# by transforming a single uint16 into its 8 bit parts
 			# you will most likely not see any differences in small networks
 			v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
 			self.HEADER.append(v[1])
 			self.HEADER.append(v[0])
+		# 14 - universe, subnet (2 x 4 bits each)
+		# 15 - net (7 bit value)
 		else:
-			# as specified in artnet 4, remember to set the value manually after
-			# Bit 3-0: Universe (1-16)
-			# Bit 7-4 = Subnet (1-16)
-			# Bit 14-8 = Net (1-128)
-			# Bit 15 = 0
+			# as specified in Artnet 4 (remember to set the value manually after):
+			# Bit 3  - 0 = Universe (1-16)
+			# Bit 7  - 4 = Subnet (1-16)
+			# Bit 14 - 8 = Net (1-128)
+			# Bit 15     = 0
 			# this means 16 * 16 * 128 = 32768 universes per port
 			# a subnet is a group of 16 Universes
 			# 16 subnets will make a net, there are 128 of them
 			self.HEADER.append(self.SUB << 4 | self.UNIVERSE)
-			self.HEADER.append(self.NET)
+			self.HEADER.append(self.NET & 0xFF)
 		# 16 - packet size (2 x 8 high byte first)
 		v = self.shift_this(self.PACKET_SIZE)		# convert to MSB / LSB
 		self.HEADER.append(v[0])
@@ -100,11 +103,12 @@ class StupidArtnet():
 		packet = bytearray()
 		packet.extend(self.HEADER)
 		packet.extend(self.BUFFER)
-		self.SEQUENCE = (self.SEQUENCE + 1) % 256 	# Not implemented
 		try:
 			self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
 		except Exception as e:
 			print("ERROR: Socket error with exception: %s" % e)
+		finally:
+			self.SEQUENCE = (self.SEQUENCE + 1) % 256
 
 	def close(self):
 		"""Close UDP socket."""
@@ -115,13 +119,13 @@ class StupidArtnet():
 	##
 
 	def start(self):
-		"""."""
+		"""Starts thread clock."""
 		self.show()
 		self.__clock = Timer((1000.0 / self.fps) / 1000.0, self.start)
 		self.__clock.start()
 
 	def stop(self):
-		"""."""
+		"""Stops thread clock."""
 		self.__clock.cancel()
 
 	##
@@ -129,8 +133,17 @@ class StupidArtnet():
 	##
 
 	def set_universe(self, universe):
-		"""Setter for universe (0 - 15)."""
-		self.UNIVERSE = self.put_in_range(universe, 0, 15, False)
+		"""Setter for universe (0 - 15 / 256).
+
+		Mind if protocol has been simplified
+		"""
+		# This is ugly, trying to keep interface easy
+		# With simplified mode the universe will be split into two
+		# values, (uni and sub) which is correct anyway. Net will always be 0
+		if (self.bIsSimplified):
+			self.UNIVERSE = self.put_in_range(universe, 0, 255, False)
+		else:
+			self.UNIVERSE = self.put_in_range(universe, 0, 15, False)
 		self.make_header()
 
 	def set_subnet(self, sub):
@@ -151,7 +164,7 @@ class StupidArtnet():
 
 	def set_packet_size(self, packet_size):
 		"""Setter for packet size (2 - 512, even only)."""
-		self.PACKET_SIZE = put_in_range(packet_size, 2, 512, True)
+		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512, True)
 		self.make_header()
 
 	##
@@ -175,6 +188,7 @@ class StupidArtnet():
 			print("ERROR: Address given greater than defined packet size")
 			return
 		if address < 1 or address > 512 - 1:
+			print("ERROR: Address out of range")
 			return
 		self.BUFFER[address - 1] = (value) & 0xFF		# low
 		self.BUFFER[address] = (value >> 8) & 0xFF		# high
@@ -185,6 +199,7 @@ class StupidArtnet():
 			print("ERROR: Address given greater than defined packet size")
 			return
 		if address < 1 or address > 512:
+			print("ERROR: Address out of range")
 			return
 		self.BUFFER[address - 1] = value
 
@@ -194,6 +209,7 @@ class StupidArtnet():
 			print("ERROR: Address given greater than defined packet size")
 			return
 		if address < 1 or address > 512:
+			print("ERROR: Address out of range")
 			return
 		self.clear()
 		self.BUFFER[address - 1] = value
@@ -204,6 +220,7 @@ class StupidArtnet():
 			print("ERROR: Address given greater than defined packet size")
 			return
 		if address < 1 or address > 510:
+			print("ERROR: Address out of range")
 			return
 		self.BUFFER[address - 1] = r
 		self.BUFFER[address] = g
@@ -265,12 +282,12 @@ class StupidArtnet():
 	@staticmethod
 	def put_in_range(number, range_min, range_max, make_even=True):
 		"""Utility method: sets number in defined range."""
-		if (make_even and number % 2 != 0):
-			number += 1
 		if (number < range_min):
 			number = range_min
 		if (number > range_max):
 			number = range_max
+		if (make_even and number % 2 != 0):
+			number += 1
 		return number
 
 
@@ -278,14 +295,14 @@ if __name__ == '__main__':
 	print("===================================")
 	print("Namespace run")
 	target_ip = '2.0.2.2'			# typically in 2.x or 10.x range
-	universe = 0 					# see docs
+	universe = 15 					# see docs
 	packet_size = 20				# it is not necessary to send whole universe
 	packet = bytearray(packet_size)
 
 	a = StupidArtnet(target_ip, universe, packet_size)
 	a.set_simplified(False)
-	a.set_net(0)
-	a.set_subnet(0)
+	a.set_net(129)
+	a.set_subnet(16)
 
 	print(a)
 
