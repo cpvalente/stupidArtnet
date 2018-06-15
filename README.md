@@ -52,7 +52,7 @@ a.stop()
 ### Notes
 
 Artnet libraries tend to be complicated and hard to get off the ground. Sources were either too simple and didn't explain the workings or become too complex by fully implementing the protocol. <br />
-This is mean as an implementation focusing on DMX over Artnet only.
+This is meant as an implementation focusing on DMX over Artnet only (ArtDMX).
 
 I am also doing my best to comment the sections where the packets is build. In an effort to help you understand the protocol and be able to extend it for a more case specific use.
 
