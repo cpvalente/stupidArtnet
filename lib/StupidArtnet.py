@@ -190,6 +190,7 @@ class StupidArtnet():
 		if address < 1 or address > 512 - 1:
 			print("ERROR: Address out of range")
 			return
+		value = self.put_in_range(value, 0, 255, False)
 		self.BUFFER[address - 1] = (value) & 0xFF		# low
 		self.BUFFER[address] = (value >> 8) & 0xFF		# high
 
@@ -201,7 +202,7 @@ class StupidArtnet():
 		if address < 1 or address > 512:
 			print("ERROR: Address out of range")
 			return
-		self.BUFFER[address - 1] = value
+		self.BUFFER[address - 1] = self.put_in_range(value, 0, 255, False)
 
 	def set_single_rem(self, address, value):
 		"""Set single value while blacking out others."""
@@ -212,7 +213,7 @@ class StupidArtnet():
 			print("ERROR: Address out of range")
 			return
 		self.clear()
-		self.BUFFER[address - 1] = value
+		self.BUFFER[address - 1] = self.put_in_range(value, 0, 255, False)
 
 	def set_rgb(self, address, r, g, b):
 		"""Set RGB from start address."""
@@ -222,9 +223,10 @@ class StupidArtnet():
 		if address < 1 or address > 510:
 			print("ERROR: Address out of range")
 			return
-		self.BUFFER[address - 1] = r
-		self.BUFFER[address] = g
-		self.BUFFER[address + 1] = b
+
+		self.BUFFER[address - 1] = self.put_in_range(r, 0, 255, False)
+		self.BUFFER[address] = self.put_in_range(g, 0, 255, False)
+		self.BUFFER[address + 1] = self.put_in_range(b, 0, 255, False)
 
 	##
 	# AUX
@@ -270,7 +272,15 @@ class StupidArtnet():
 
 	@staticmethod
 	def shift_this(number, high_first=True):
-		"""Utility method: extracts MSB and LSB from number."""
+		"""Utility method: extracts MSB and LSB from number.
+
+		Args:
+		number - number to shift
+		high_first - MSB or LSB first (true / false)
+
+		Returns:
+		(high, low) - tuple with shifted values
+		"""
 		low = (number & 0xFF)
 		high = ((number >> 8) & 0xFF)
 		if (high_first):
@@ -282,7 +292,17 @@ class StupidArtnet():
 
 	@staticmethod
 	def put_in_range(number, range_min, range_max, make_even=True):
-		"""Utility method: sets number in defined range."""
+		"""Utility method: sets number in defined range.
+
+		Args:
+		number - number to use
+		range_min - lowest possible number
+		range_max - highest possible number
+		make_even - should number be made even
+
+		Returns:
+		number - number in correct range
+		"""
 		if (number < range_min):
 			number = range_min
 		if (number > range_max):
@@ -304,7 +324,6 @@ if __name__ == '__main__':
 	a.set_simplified(False)
 	a.set_net(129)
 	a.set_subnet(16)
-
 
 	print(a)
 
