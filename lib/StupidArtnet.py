@@ -258,8 +258,9 @@ class StupidArtnet():
 	def flash_all(self):
 		"""Sends 255's all across."""
 		packet = bytearray(self.PACKET_SIZE)
-		for i in range(self.PACKET_SIZE):
-			packet[i] = 255
+		[255 for i in packet]
+		# for i in range(self.PACKET_SIZE):
+		# 	packet[i] = 255
 		self.set(packet)
 		self.show()
 
@@ -294,7 +295,7 @@ class StupidArtnet():
 if __name__ == '__main__':
 	print("===================================")
 	print("Namespace run")
-	target_ip = '2.0.2.2'			# typically in 2.x or 10.x range
+	target_ip = '127.0.0.1'			# typically in 2.x or 10.x range
 	universe = 15 					# see docs
 	packet_size = 20				# it is not necessary to send whole universe
 	packet = bytearray(packet_size)
@@ -304,6 +305,7 @@ if __name__ == '__main__':
 	a.set_net(129)
 	a.set_subnet(16)
 
+
 	print(a)
 
 	a.set_single_value(13, 255)
@@ -311,6 +313,10 @@ if __name__ == '__main__':
 	a.set_single_value(15, 200)
 
 	print("Sending values")
+	a.show()
+	a.see_buffer()
+	a.flash_all()
+	a.see_buffer()
 	a.show()
 	print("Values sent")
 
