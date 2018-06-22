@@ -42,6 +42,7 @@ a.flash_all()						# send single packet with all channels at 255
 time.sleep(1)						# wait a bit, 1 sec
 
 a.blackout()						# send single packet with all channels at 0
+a.see_buffer()
 
 # ALL THE ABOVE EXAMPLES SEND A SINGLE DATAPACKET
 # STUPIDARTNET IS ALSO THREADABLE
@@ -54,6 +55,10 @@ for x in range(100):
 		packet[i] = random.randint(0, 255)
 	a.set(packet)
 	time.sleep(.2)
+
+# SOME DEVICES WOULD HOLD LAST DATA, TURN ALL OFF WHEN DONE
+
+a.blackout()
 
 # ... REMEMBER TO CLOSE THE THREAD ONCE YOU ARE DONE
 a.stop()
