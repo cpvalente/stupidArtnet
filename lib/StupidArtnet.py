@@ -41,6 +41,10 @@ class StupidArtnet():
 
 		self.make_header()
 
+	def __del__(self):
+		self.stop()
+		self.close()
+
 	def __str__(self):
 		"""Printable object state."""
 		s = "===================================\n"
@@ -122,6 +126,7 @@ class StupidArtnet():
 		"""Starts thread clock."""
 		self.show()
 		self.__clock = Timer((1000.0 / self.fps) / 1000.0, self.start)
+		self.__clock.daemon = True
 		self.__clock.start()
 
 	def stop(self):
@@ -280,6 +285,7 @@ class StupidArtnet():
 
 		Returns:
 		(high, low) - tuple with shifted values
+
 		"""
 		low = (number & 0xFF)
 		high = ((number >> 8) & 0xFF)
@@ -302,6 +308,7 @@ class StupidArtnet():
 
 		Returns:
 		number - number in correct range
+
 		"""
 		if (number < range_min):
 			number = range_min
@@ -337,6 +344,7 @@ if __name__ == '__main__':
 	a.flash_all()
 	a.see_buffer()
 	a.show()
+
 	print("Values sent")
 
-	a.close()
+	del a
