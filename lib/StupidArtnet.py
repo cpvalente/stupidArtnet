@@ -29,7 +29,7 @@ class StupidArtnet():
 		self.NET = 0
 		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512)
 		self.HEADER = bytearray()
-		self.BUFFER = bytearray(packet_size)
+		self.BUFFER = bytearray(self.PACKET_SIZE)
 
 		self.bIsSimplified = True		# simplify use of universe, net and subnet
 
