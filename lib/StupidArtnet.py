@@ -18,7 +18,7 @@ class StupidArtnet():
 
 	UDP_PORT = 6454
 
-	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30):
+	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30, receiver_needs_even_packet_size=True):
 		"""Class Initialization."""
 		# Instance variables
 		self.TARGET_IP = targetIP
@@ -27,9 +27,11 @@ class StupidArtnet():
 		self.UNIVERSE = universe
 		self.SUB = 0
 		self.NET = 0
-		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512)
+		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512, receiver_needs_even_packet_size)
 		self.HEADER = bytearray()
 		self.BUFFER = bytearray(self.PACKET_SIZE)
+
+		self.bMakeEven = receiver_needs_even_packet_size
 
 		self.bIsSimplified = True		# simplify use of universe, net and subnet
 
@@ -169,7 +171,7 @@ class StupidArtnet():
 
 	def set_packet_size(self, packet_size):
 		"""Setter for packet size (2 - 512, even only)."""
-		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512, True)
+		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512, self.bMakeEven)
 		self.make_header()
 
 	##
