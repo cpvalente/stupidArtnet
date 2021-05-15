@@ -192,7 +192,7 @@ class StupidArtnet():
 			return
 		self.BUFFER = p
 
-	def set_16bit(self, address, value):
+	def set_16bit(self, address, value, high_first=False):
 		"""Set single 16bit value in DMX buffer."""
 		if address > self.PACKET_SIZE:
 			print("ERROR: Address given greater than defined packet size")
@@ -201,8 +201,14 @@ class StupidArtnet():
 			print("ERROR: Address out of range")
 			return
 		value = self.put_in_range(value, 0, 65535, False)
-		self.BUFFER[address - 1] = (value) & 0xFF		# low
-		self.BUFFER[address] = (value >> 8) & 0xFF		# high
+
+		# Check for endianess
+		if (high_first):
+			self.BUFFER[address - 1] = (value >> 8) & 0xFF	# high
+			self.BUFFER[address] 		 = (value) & 0xFF 			# low
+		else:
+			self.BUFFER[address - 1] = (value) & 0xFF				# low
+			self.BUFFER[address] 		 = (value >> 8) & 0xFF	# high
 
 	def set_single_value(self, address, value):
 		"""Set single value in DMX buffer."""
