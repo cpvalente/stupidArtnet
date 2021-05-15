@@ -200,7 +200,7 @@ class StupidArtnet():
 		if address < 1 or address > 512 - 1:
 			print("ERROR: Address out of range")
 			return
-		value = self.put_in_range(value, 0, 255, False)
+		value = self.put_in_range(value, 0, 65535, False)
 		self.BUFFER[address - 1] = (value) & 0xFF		# low
 		self.BUFFER[address] = (value >> 8) & 0xFF		# high
 
