@@ -18,7 +18,7 @@ class StupidArtnet():
 
 	UDP_PORT = 6454
 
-	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30, receiver_needs_even_packet_size=True):
+	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30, receiver_needs_even_packet_size=True, broadcast=False):
 		"""Class Initialization."""
 		# Instance variables
 		self.TARGET_IP = targetIP
@@ -37,6 +37,9 @@ class StupidArtnet():
 
 		# UDP SOCKET
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+		if broadcast:
+		    self.s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 		# Timer
 		self.fps = fps

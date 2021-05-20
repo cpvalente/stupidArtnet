@@ -3,9 +3,9 @@ import time
 import random
 
 # THESE ARE MOST LIKELY THE VALUES YOU WILL BE NEEDING
-target_ip = '192.168.1.10'		# typically in 2.x or 10.x range
-universe = 0 					# see docs
-packet_size = 100				# it is not necessary to send whole universe
+target_ip = '255.255.255.255'		# typically in 2.x or 10.x range
+universe = 0 										# see docs
+packet_size = 100								# it is not necessary to send whole universe
 
 # CREATING A STUPID ARTNET OBJECT
 # SETUP NEEDS A FEW ELEMENTS
@@ -13,7 +13,8 @@ packet_size = 100				# it is not necessary to send whole universe
 # UNIVERSE    = DEFAULT 0
 # PACKET_SIZE = DEFAULT 512
 # FRAME_RATE  = DEFAULT 30
-a = StupidArtnet(target_ip, universe, packet_size)
+# ISBROADCAST = DEFAULT FALSE
+a = StupidArtnet(target_ip, universe, packet_size, 30, True, True)
 
 # MORE ADVANCED CAN BE SET WITH SETTERS IF NEEDED
 # NET         = DEFAULT 0
