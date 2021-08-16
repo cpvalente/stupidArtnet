@@ -60,9 +60,9 @@ Users looking to send a few channels to control a couple of LEDs, projectors or 
 
 Are you running several universes with different fixture types? I would recommend [ArtnetLibs](https://github.com/OpenLightingProject/libartnet) or the [Python Wrapper for Artnet Libs](https://github.com/haum/libartnet)
 
-### Artnet
+### Art-Net
 
-Really Artnet is really simple. just shove the protocol header into your data array and send it to the right place.
+Getting things running with protocol is pretty simple. just shove the protocol header into your data array and send it to the right place.
 Usually Artnet devices are in the range of 2.x.x.x or 10.x.x.x. This is a convention however is not forcefully implemented.
 I have filled the data to represent a ArtDmx packet
 
@@ -94,6 +94,8 @@ I have filled the data to represent a ArtDmx packet
 | Bit 15   | Bits 14-8  | Bits 7-4  | Bits 3-0  |
 | :------- | :--------- | :-------- | :-------- |
 | 0        | Net        | Subnet    | Universe  |
+
+Note: This is true for the current version of Artnet 4 (v14), as [defined here](https://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf)
 
 ### Nets and Subnets
 
