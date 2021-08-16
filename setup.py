@@ -23,5 +23,4 @@ setuptools.setup(name='stupidArtnet',
                  packages=['stupidArtnet'],
                  package_dir='stupidArtnet',
                  packages=setuptools.find_packages(where='stupidArtnet'),
-                 python_requires=">=3.6",
-                 zip_safe=False)
+                 python_requires=">=3.6")
