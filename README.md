@@ -1,3 +1,6 @@
+[![.github/workflows/publish-to-pypi.yml](https://github.com/cpvalente/stupidArtnet/actions/workflows/publish-to-pypi.yml/badge.svg)](https://github.com/cpvalente/stupidArtnet/actions/workflows/publish-to-pypi.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 # StupidArtnet
 
 (Very) Simple Artnet implementation in Python
