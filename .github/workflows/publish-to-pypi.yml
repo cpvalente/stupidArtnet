@@ -6,7 +6,7 @@ jobs:
     name: Build and publish Python 🐍 distributions to PyPI
     runs-on: ubuntu-18.04
 
-   steps:
+    steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.6
       uses: actions/setup-python@v1
