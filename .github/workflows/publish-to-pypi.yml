@@ -1,6 +1,9 @@
 name: Publish Python 🐍 distributions to PyPI
 on:
   push:
+  # Only commits on main branch
+    branches:
+    - master
   # Pattern matched against refs/tags
     tags:
     # Push events to every tag not containing /
