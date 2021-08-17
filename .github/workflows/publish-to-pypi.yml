@@ -1,4 +1,4 @@
-name: Publish Python 🐍 distributions to PyPI
+name: Publish to PyPI 🐍
 on:
   push:
   # Only commits on main branch

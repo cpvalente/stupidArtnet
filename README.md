@@ -6,6 +6,18 @@
 (Very) Simple Artnet implementation in Python
 
 
+### Installing from github
+You can get up and running quickly cloning from github.
+Run the example file to make sure everything is up to scratch
+```
+$ git clone https://github.com/cpvalente/stupidArtnet.git
+$ cd stupidArtnet
+$ python3 example.py
+```
+### Installing from Pip
+The project is now available in [Pip](https://pypi.org/project/stupidArtnet/1.0/) and can be installed with
+```pip install stupidartnet```
+
 ### Basics
 Sending simple Artnet packets is pretty easy
 ```
