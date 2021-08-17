@@ -20,7 +20,6 @@ setuptools.setup(name='stupidArtnet',
                          'Operating System :: OS Independent',
                      ],
                  keywords=['LIGHTING', 'DMX', 'LIGHTING CONTROL'],
-                 packages=['stupidArtnet'],
-                 package_dir='stupidArtnet',
+                 package_dir={'': 'stupidArtnet'},
                  packages=setuptools.find_packages(where='stupidArtnet'),
                  python_requires=">=3.6")
