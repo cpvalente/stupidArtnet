@@ -21,5 +21,5 @@ setuptools.setup(name='stupidArtnet',
                      ],
                  keywords=['LIGHTING', 'DMX', 'LIGHTING CONTROL'],
                  package_dir={'': 'stupidArtnet'},
-                 packages=setuptools.find_packages(where='stupidArtnet'),
+                 packages=['stupidArtnet'],
                  python_requires=">=3.6")
