@@ -39,8 +39,15 @@ a.set_single_value(address, value)
 a.show()
 
 # THE DATA IS SAVED IN THE INSTANCE BUFFER
-# YOU CAN SEND THE LAST BUFFER AGAIN BY CALLING .show
+# YOU CAN SEND THE LAST BUFFER AGAIN BY CALLING .show()
 a.show()
+
+# I HAVE ALSO ADDED AN UTILITY FUNCITON .send()
+# THIS WOULD TACKE THE EFFECT OF DOING SETTING THE PACKET
+# AND SHOWING THAT PACKET
+# a.set(packet)
+# a.show(packet)
+a.send(packet)
 
 ```
 ### Persistent sending

@@ -251,6 +251,17 @@ class StupidArtnet():
 	# AUX
 	##
 
+	def send(self, p):
+		"""Set buffer and send straightaway.
+
+		Args:
+		array - integer array to send
+		"""
+
+		self.set(p);
+		self.show();
+
+
 	def set_simplified(self, bDoSimplify):
 		"""Builds Header accordingly.
 
