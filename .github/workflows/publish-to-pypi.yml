@@ -25,8 +25,7 @@ jobs:
 
     steps:
     - name: Run test
-      run: python -m unittest test_client.py --v
-      working-directory: ./stupidArtnet
+      run: python -m unittest discover --v
 
   build-and-publish:
     needs: test
