@@ -5,6 +5,9 @@ import socket
 
 class Test(unittest.TestCase):
 
+    # Art-Net stuff
+    header_size = 18
+
     def setUp(self):
         """Creates UDP Server and Art-Net Client."""
 
@@ -16,6 +19,15 @@ class Test(unittest.TestCase):
         # Instanciate stupidArtnet
         self.stupid = StupidArtnet(packet_size=24)
 
+        # define a packet to send
+        data = [x for x in range(25)]
+
+        # send packet
+        self.stupid.send(data)
+
+        # assert result
+        self.received = self.sock.recv(512)
+
     def tearDown(self):
         """Destroy Objects."""
 
@@ -25,27 +37,22 @@ class Test(unittest.TestCase):
         # destroy artnet instance
         del(self.stupid)
 
-    def test_client(self):
-        """Sends data to server and asserts output."""
-
-        # define a packet to send
-        data = [x for x in range(25)]
-
-        # send packet
-        self.stupid.send(data)
-
-        # assert result
-        m = self.sock.recv(512)
-
+    def test_header(self):
+        """Assert Art-Net header."""
         # Art-Net header
-        self.assertTrue(m.startswith(b'Art-Net'))
+        self.assertTrue(self.received.startswith(b'Art-Net'))
 
-        # Check a few random points
-        header_size = 18
+    def test_zero(self):
+        """Check first data value, should be 0."""
+        self.assertEqual(self.received[self.header_size], 0)
 
-        self.assertEqual(m[header_size],        0)
-        self.assertEqual(m[header_size] + 12,   12)
-        self.assertEqual(m[header_size] + 24,   24)
+    def test_twelve(self):
+        """Check twelfth data value, should be 12."""
+        self.assertEqual(self.received[self.header_size] + 12, 12)
+
+    def test_twentyfour(self):
+        """Check twenty-fourth data value, should be 24."""
+        self.assertEqual(self.received[self.header_size] + 24, 24)
 
 
 if __name__ == '__main__':
