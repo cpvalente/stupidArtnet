@@ -1,20 +1,15 @@
 name: Publish to PyPI 🐍
 on:
   push:
-  # Only commits on main branch
-    branches:
-    - master
-  # Pattern matched against refs/tags
+    # Only publish on new tags
     tags:
-    # Push events to every tag not containing /
-      - '*'
+    - '*'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build-n-publish:
-    name: Build and publish Python 🐍 distributions to PyPI
+  setup:
     runs-on: ubuntu-18.04
 
     steps:
@@ -24,6 +19,20 @@ jobs:
       with:
         python-version: 3.6
 
+  test:
+    needs: setup
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Run test
+      run: python -m unittest test_client.py --v
+      working-directory: ./stupidArtnet
+
+  build-and-publish:
+    needs: test
+    runs-on: ubuntu-18.04
+
+    steps:
     - name: Install pypa/build
       run: >-
         python -m
@@ -39,7 +48,8 @@ jobs:
         --wheel
         --outdir dist/
         .
-    - name: Publish distribution to PyPI
+
+    - name: Publish distribution to PyPI 🐍
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
