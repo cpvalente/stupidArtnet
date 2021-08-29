@@ -69,7 +69,9 @@ for x in range(100):
 a.stop()
 
 ```
-
+### Persistent sending
+See examples
+- [x] Use with Tkinter
 
 ### Notes
 
