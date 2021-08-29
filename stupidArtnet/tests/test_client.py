@@ -15,6 +15,7 @@ class Test(unittest.TestCase):
         self.sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.sock.bind(('localhost', 6454))
+        self.sock.settimeout(2000)
 
         # Instanciate stupidArtnet
         self.stupid = StupidArtnet(packet_size=24)
