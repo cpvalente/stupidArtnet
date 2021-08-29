@@ -49,6 +49,7 @@ jobs:
         .
 
     - name: Publish distribution to PyPI 🐍
+      if: ${{ !env.ACT }}
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
