@@ -1,4 +1,4 @@
-name: Publish to PyPI 🐍
+name: Publish to PyPI 🐍 
 on:
   push:
     # Only publish on new tags
@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup:
-    runs-on: ubuntu-18.04
+  test-build-publish:
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@master
@@ -19,20 +19,11 @@ jobs:
       with:
         python-version: 3.6
 
-  test:
-    needs: setup
-    runs-on: ubuntu-18.04
-
-    steps:
     - name: Run test
       run: python -m unittest discover --v
 
-  build-and-publish:
-    needs: test
-    runs-on: ubuntu-18.04
-
-    steps:
     - name: Install pypa/build
+      working-directory: /
       run: >-
         python -m
         pip install
