@@ -1,4 +1,4 @@
-from stupidArtnet.StupidArtnet import StupidArtnet
+from stupidArtnet import StupidArtnet
 import time
 import random
 
