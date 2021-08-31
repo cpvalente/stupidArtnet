@@ -54,7 +54,7 @@ a.send(packet)
 Usually Artnet devices (and DMX in general) transmit data at a rate of no less than 30Hz.
 You can do this with StupidArtnet by using its threaded abilities
 
-```
+```python
 # TO SEND PERSISTENT SIGNAL YOU CAN START THE THREAD
 a.start()
 
@@ -69,8 +69,8 @@ for x in range(100):
 a.stop()
 
 ```
-### Persistent sending
-See examples
+### Example code
+See examples folder inside the package directory
 - [x] Use with Tkinter
 
 ### Notes
