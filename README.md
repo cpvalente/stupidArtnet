@@ -9,10 +9,10 @@
 ### Installing from github
 You can get up and running quickly cloning from github.
 Run the example file to make sure everything is up to scratch
-```
+```bash
 $ git clone https://github.com/cpvalente/stupidArtnet.git
 $ cd stupidArtnet
-$ python3 example.py
+$ python3 examples/example.py
 ```
 ### Installing from Pip
 The project is now available in [Pip](https://pypi.org/project/stupidArtnet/1.0/) and can be installed with
@@ -20,7 +20,7 @@ The project is now available in [Pip](https://pypi.org/project/stupidArtnet/1.0/
 
 ### Basics
 Sending simple Artnet packets is pretty easy
-```
+```python
 # A StupidArtnet instance holds a target IP / universe and a buffer
 a = StupidArtnet(target_ip, universe, packet_size)
 
@@ -43,10 +43,10 @@ a.show()
 a.show()
 
 # I HAVE ALSO ADDED AN UTILITY FUNCITON .send()
-# THIS WOULD TACKE THE EFFECT OF DOING SETTING THE PACKET
-# AND SHOWING THAT PACKET
+# THIS WOULD TAKE THE EFFECT OF SETTING THE BUFFER
+# AND CALLING SHOW
 # a.set(packet)
-# a.show(packet)
+# a.show()
 a.send(packet)
 
 ```
@@ -69,7 +69,9 @@ for x in range(100):
 a.stop()
 
 ```
-
+### Persistent sending
+See examples
+- [x] Use with Tkinter
 
 ### Notes
 
@@ -125,7 +127,7 @@ Artnet uses the concept of Universes and Subnets for data routing. I simplified 
 This will look correct and behave fine for smaller networks, wanting to be able to specify Universes, Subnets and Nets you can disable simplification and give values as needed. <br />
 The spec for Artnet 4 applies here: 128 Nets contain 16 Subnets which contain 16 Universes. 128 * 16 * 16 = 32 768 Universes
 
-```
+```python
 # Create a StupidArtnet instance with the relevant values
 
 # By default universe is simplified to a value between 0 - 255
