@@ -20,5 +20,6 @@ setup(name='stupidArtnet',
           'Operating System :: OS Independent',
       ],
       keywords=['LIGHTING', 'DMX', 'LIGHTING CONTROL'],
-      packages=find_packages(exclude=['*tests*']),
+      packages=['stupidArtnet'],
+      package_data={'stupidArtnet': ['examples/*']},
       python_requires=">=3.6")
