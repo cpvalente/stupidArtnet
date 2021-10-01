@@ -11,8 +11,7 @@ NOTES
 
 import socket
 from threading import Thread
-# from .StupidArtnet import StupidArtnet # works with the test file
-from StupidArtnet import StupidArtnet  # works locally
+from ArtnetUtils import shift_this, make_address_mask
 
 
 class StupidArtnetServer():
@@ -21,33 +20,13 @@ class StupidArtnetServer():
     UDP_PORT = 6454
     s = None
     ARTDMX_HEADER = b'Art-Net\x00\x00P\x00\x0e'
-    callback = None
+    listeners = list()
 
-    def __init__(self, universe=0, sub=0, net=0, setSimplified=True, callback_function=None):
-        """Initializes Art-Net server.
+    def __init__(self):
+        """Initializes Art-Net server."""
 
-        Args:
-        universe - Universe to listen
-        sub - Subnet to listen
-        net - Net to listen
-        setSimplified - Wheter to use nets and subnet or simpler definition for universe only, see User Guide page 5 (Universe Addressing)
-
-        Returns:
-        None
-
-        """
         # server active flag
         self.listen = True
-
-        self.universe = universe
-        self.subnet = sub
-        self.net = net
-        self.buffer = []
-        self.callback = callback_function
-
-        # simplify use of universe, net and subnet
-        self.bIsSimplified = setSimplified
-        self.address_mask = self.__make_address_mask()
 
         self.th = Thread(target=self.__init_socket, daemon=True)
         self.th.start()
@@ -56,7 +35,7 @@ class StupidArtnetServer():
         # Bind to UDP on the correct PORT
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind(('', 6454))  # Listen on any IP valid
+        self.s.bind(('', self.UDP_PORT))  # Listen on any valid IP
 
         while self.listen:
 
@@ -65,96 +44,123 @@ class StupidArtnetServer():
             # only dealing with Art-Net DMX
             if self.validate_header(data):
 
-                # is it the address we are listening to
-                if (data[14:16] == self.address_mask):
-                    self.buffer = list(data)[18:]
+                # check if this address is in any registered listener
+                for listener in self.listeners:
 
-                    # check for registered callbacks
-                    if (self.callback != None):
-                        self.callback(self.buffer)
+                    # is it the address we are listening to
+                    if (listener['address_mask'] == data[14:16]):
+                        listener['buffer'] = list(data)[18:]
 
-    def __make_address_mask(self):
-
-        address_mask = bytearray()
-
-        if (self.bIsSimplified):
-            a = StupidArtnet.shift_this(self.universe)  # convert to MSB / LSB
-            address_mask.append(a[1])
-            address_mask.append(a[0])
-
-        else:
-            address_mask.append(self.subnet << 4 | self.universe)
-            address_mask.append(self.net & 0xFF)
-
-        return address_mask
+                        # check for registered callbacks
+                        if (listener['callback'] != None):
+                            listener['callback'](listener['buffer'])
 
     def __del__(self):
         """Graceful shutdown."""
+        self.listeners.clear()
         self.close()
 
     def __str__(self):
         """Printable object state."""
         s = "===================================\n"
         s += "Stupid Artnet Listening\n"
-        s += "Universe: %i \n" % self.universe
-        if not (self.bIsSimplified):
-            s += "Subnet: %i \n" % self.subnet
-            s += "Net: %i \n" % self.net
-        if (self.callback != None):
-            s += "Callback function active"
-        s += "\n"
         return s
 
-    def see_buffer(self):
+    def register_listener(self, universe=0, sub=0, net=0, is_simplified=True, callback_function=None):
+        """Adds a listener to an Art-Net Universe.
+
+        Args:
+        universe - Universe to listen
+        sub - Subnet to listen
+        net - Net to listen
+        is_simplified - Wheter to use nets and subnet or simpler definition for universe only, see User Guide page 5 (Universe Addressing)
+        callback_function - Function to call when new packet is received
+
+        Returns:
+        id - id of listener, used to delete listener if required
+        """
+
+        listener_id = len(self.listeners)
+        new_listener = {
+            'id': listener_id,
+            'simplified': is_simplified,
+            'address_mask': make_address_mask(universe, sub, net, is_simplified),
+            'callback': callback_function,
+            'buffer': []
+        }
+
+        self.listeners.append(new_listener)
+
+        return listener_id
+
+    def delete_listener(self, listener_id):
+        """Deletes a registered listener.
+
+        Args:
+        listener_id - Id of listener to delete
+
+        Returns:
+        None
+        """
+        self.listeners = [
+            i for i in self.listeners if not (i['id'] == listener_id)]
+
+        return None
+
+    def delete_all_listener(self):
+        """Deletes all registered listeners.
+
+        Returns:
+        None
+        """
+        self.listeners = []
+        return None
+
+    def see_buffer(self, listener_id):
         """Show buffer values."""
-        print(self.buffer)
+        for listener in self.listeners:
+            if (listener.get('id') == listener_id):
+                print(listener.get('buffer'))
 
-    def get_buffer(self):
+        return "Listener not found"
+
+    def get_buffer(self, listener_id):
         """Return buffer values."""
-        return self.buffer
+        for listener in self.listeners:
+            if (listener.get('id') == listener_id):
+                return(listener.get('buffer'))
 
-    def set_callback(self, callback_function):
-        """Utility function to easily set callback for receivind data."""
-        self.callbacks = callback_function
+        return None
 
-    def set_universe(self, universe):
-        """Setter for universe (0 - 15 / 256).
+    def clear_buffer(self, listener_id):
+        """Clear buffer in listener."""
+        for listener in self.listeners:
+            if (listener.get('id') == listener_id):
+                listener['buffer'] = []
 
-        Mind if protocol has been simplified
-        """
+    def set_callback(self, listener_id, callback_function):
+        """Add / change callback to a given listener."""
+        for listener in self.listeners:
+            if (listener.get('id') == listener_id):
+                listener['callback'] = callback_function
 
-        if (self.bIsSimplified):
-            self.universe = StupidArtnet.put_in_range(universe, 0, 255, False)
-        else:
-            self.universe = StupidArtnet.put_in_range(universe, 0, 15, False)
+    def set_address_filter(self, listener_id, universe, sub=0, net=0, is_simplified=True):
+        """Add / change filter to existing listener."""
+        # make mask bytes
+        address_mask = make_address_mask(
+            universe, sub, net, is_simplified)
 
-        # recalculate address mask
-        self.__make_address_mask()
-
-    def set_subnet(self, subnet):
-        """Setter for subnet address (0 - 15).
-
-        Set simplify to false to use
-        """
-        self.subnet = StupidArtnet.put_in_range(subnet, 0, 15, False)
-        self.__make_address_mask()
-
-    def set_net(self, net):
-        """Setter for net address (0 - 127).
-
-        Set simplify to false to use
-        """
-        self.net = StupidArtnet.put_in_range(net, 0, 127, False)
-        self.__make_address_mask()
+        # find listener
+        for listener in self.listeners:
+            if (listener.get('id') == listener_id):
+                listener['simplified'] = is_simplified
+                listener['address_mask'] = address_mask
+                listener['buffer'] = []
 
     def close(self):
         """Close UDP socket."""
         self.listen = False         # Set flag
         self.th.join()              # Terminate thread once jobs are complete
-
-    def clear(self):
-        """Clear internal DMX Buffer."""
-        self.buffer = []
 
     @staticmethod
     def validate_header(header):
@@ -191,9 +197,14 @@ if __name__ == '__main__':
     # Here we use the simplified default
     universe = 1
 
-    # Initilize server with a universe to listen to
-    # And set a callback
-    a = StupidArtnetServer(universe, callback_function=test_callback)
+    # Initilize server, this starts a server in the Art-Net port
+    a = StupidArtnetServer()
+
+    # For every universe we would like to receive,
+    # add a new listener with a optional callback
+    # the return is an id for the listener
+    u1_listener = a.register_listener(
+        universe, callback_function=test_callback)
 
     # print object state
     print(a)
@@ -201,8 +212,8 @@ if __name__ == '__main__':
     # giving it some time for the demo
     time.sleep(3)
 
-    # the latest DMX packet is available as an array
-    buffer = a.get_buffer()
+    # use the listener address to get data without a callback
+    buffer = a.get_buffer(u1_listener)
 
     # Cleanup when you are done
     del a
