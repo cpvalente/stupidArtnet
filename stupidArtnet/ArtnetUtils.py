@@ -38,7 +38,7 @@ def put_in_range(number, range_min, range_max, make_even=True):
     return number
 
 
-def make_address_mask(universe, sub, net, is_simplified):
+def make_address_mask(universe, sub=0, net=0, is_simplified=True):
     """Returns the address bytes for a given universe, subnet and net.
 
     Args:

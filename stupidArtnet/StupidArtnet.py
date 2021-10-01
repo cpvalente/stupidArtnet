@@ -2,7 +2,6 @@
 
 Python Version: 3.6
 Source: http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf
-		http://art-net.org.uk/wordpress/structure/streaming-packets/artdmx-packet-definition/
 
 NOTES
 - For simplicity: NET and SUBNET not used by default but optional
@@ -11,6 +10,7 @@ NOTES
 
 import socket
 from threading import Timer
+from ArtnetUtils import shift_this, put_in_range
 
 
 class StupidArtnet():
@@ -18,8 +18,22 @@ class StupidArtnet():
 
 	UDP_PORT = 6454
 
-	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30, receiver_needs_even_packet_size=True, broadcast=False):
-		"""Class Initialization."""
+	def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30, even_packet_size=True, broadcast=False):
+		"""Initializes Art-Net Client.
+
+		Args:
+		targetIP - IP of receiving device
+		universe - universe to listen
+		packet_size - amount of channels to transmit
+		fps - transmition rate
+		even_packet_size - Some receivers enforce even packets
+		broadcast - whether to broadcast in local sub
+
+		Returns:
+		None
+
+		"""
+
 		# Instance variables
 		self.TARGET_IP = targetIP
 		self.SEQUENCE = 0
@@ -27,11 +41,12 @@ class StupidArtnet():
 		self.UNIVERSE = universe
 		self.SUB = 0
 		self.NET = 0
-		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512, receiver_needs_even_packet_size)
+		self.PACKET_SIZE = put_in_range(
+		    packet_size, 2, 512, even_packet_size)
 		self.HEADER = bytearray()
 		self.BUFFER = bytearray(self.PACKET_SIZE)
 
-		self.bMakeEven = receiver_needs_even_packet_size
+		self.bMakeEven = even_packet_size
 
 		self.bIsSimplified = True		# simplify use of universe, net and subnet
 
@@ -39,7 +54,7 @@ class StupidArtnet():
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 		if broadcast:
-		    self.s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+			self.s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 		# Timer
 		self.fps = fps
@@ -47,6 +62,7 @@ class StupidArtnet():
 		self.make_header()
 
 	def __del__(self):
+		"""Graceful shutdown."""
 		self.stop()
 		self.close()
 
@@ -86,7 +102,7 @@ class StupidArtnet():
 			# the whole net subnet is simplified
 			# by transforming a single uint16 into its 8 bit parts
 			# you will most likely not see any differences in small networks
-			v = self.shift_this(self.UNIVERSE)			# convert to MSB / LSB
+			v = shift_this(self.UNIVERSE)			# convert to MSB / LSB
 			self.HEADER.append(v[1])
 			self.HEADER.append(v[0])
 		# 14 - universe, subnet (2 x 4 bits each)
@@ -103,7 +119,7 @@ class StupidArtnet():
 			self.HEADER.append(self.SUB << 4 | self.UNIVERSE)
 			self.HEADER.append(self.NET & 0xFF)
 		# 16 - packet size (2 x 8 high byte first)
-		v = self.shift_this(self.PACKET_SIZE)		# convert to MSB / LSB
+		v = shift_this(self.PACKET_SIZE)		# convert to MSB / LSB
 		self.HEADER.append(v[0])
 		self.HEADER.append(v[1])
 
@@ -154,9 +170,9 @@ class StupidArtnet():
 		# With simplified mode the universe will be split into two
 		# values, (uni and sub) which is correct anyway. Net will always be 0
 		if (self.bIsSimplified):
-			self.UNIVERSE = self.put_in_range(universe, 0, 255, False)
+			self.UNIVERSE = put_in_range(universe, 0, 255, False)
 		else:
-			self.UNIVERSE = self.put_in_range(universe, 0, 15, False)
+			self.UNIVERSE = put_in_range(universe, 0, 15, False)
 		self.make_header()
 
 	def set_subnet(self, sub):
@@ -164,7 +180,7 @@ class StupidArtnet():
 
 		Set simplify to false to use
 		"""
-		self.SUB = self.put_in_range(sub, 0, 15, False)
+		self.SUB = put_in_range(sub, 0, 15, False)
 		self.make_header()
 
 	def set_net(self, net):
@@ -172,12 +188,12 @@ class StupidArtnet():
 
 		Set simplify to false to use
 		"""
-		self.NET = self.put_in_range(net, 0, 127, False)
+		self.NET = put_in_range(net, 0, 127, False)
 		self.make_header()
 
 	def set_packet_size(self, packet_size):
 		"""Setter for packet size (2 - 512, even only)."""
-		self.PACKET_SIZE = self.put_in_range(packet_size, 2, 512, self.bMakeEven)
+		self.PACKET_SIZE = put_in_range(packet_size, 2, 512, self.bMakeEven)
 		self.make_header()
 
 	##
@@ -203,15 +219,15 @@ class StupidArtnet():
 		if address < 1 or address > 512 - 1:
 			print("ERROR: Address out of range")
 			return
-		value = self.put_in_range(value, 0, 65535, False)
+		value = put_in_range(value, 0, 65535, False)
 
 		# Check for endianess
 		if (high_first):
-			self.BUFFER[address - 1] = (value >> 8) & 0xFF	# high
-			self.BUFFER[address] 		 = (value) & 0xFF 			# low
+			self.BUFFER[address - 1] = (value >> 8) & 0xFF  # high
+			self.BUFFER[address] = (value) & 0xFF 			# low
 		else:
 			self.BUFFER[address - 1] = (value) & 0xFF				# low
-			self.BUFFER[address] 		 = (value >> 8) & 0xFF	# high
+			self.BUFFER[address] = (value >> 8) & 0xFF  # high
 
 	def set_single_value(self, address, value):
 		"""Set single value in DMX buffer."""
@@ -221,7 +237,7 @@ class StupidArtnet():
 		if address < 1 or address > 512:
 			print("ERROR: Address out of range")
 			return
-		self.BUFFER[address - 1] = self.put_in_range(value, 0, 255, False)
+		self.BUFFER[address - 1] = put_in_range(value, 0, 255, False)
 
 	def set_single_rem(self, address, value):
 		"""Set single value while blacking out others."""
@@ -232,7 +248,7 @@ class StupidArtnet():
 			print("ERROR: Address out of range")
 			return
 		self.clear()
-		self.BUFFER[address - 1] = self.put_in_range(value, 0, 255, False)
+		self.BUFFER[address - 1] = put_in_range(value, 0, 255, False)
 
 	def set_rgb(self, address, r, g, b):
 		"""Set RGB from start address."""
@@ -243,9 +259,9 @@ class StupidArtnet():
 			print("ERROR: Address out of range")
 			return
 
-		self.BUFFER[address - 1] = self.put_in_range(r, 0, 255, False)
-		self.BUFFER[address] = self.put_in_range(g, 0, 255, False)
-		self.BUFFER[address + 1] = self.put_in_range(b, 0, 255, False)
+		self.BUFFER[address - 1] = put_in_range(r, 0, 255, False)
+		self.BUFFER[address] = put_in_range(g, 0, 255, False)
+		self.BUFFER[address + 1] = put_in_range(b, 0, 255, False)
 
 	##
 	# AUX
@@ -257,10 +273,8 @@ class StupidArtnet():
 		Args:
 		array - integer array to send
 		"""
-
-		self.set(p);
-		self.show();
-
+		self.set(p)
+		self.show()
 
 	def set_simplified(self, bDoSimplify):
 		"""Builds Header accordingly.
@@ -296,53 +310,6 @@ class StupidArtnet():
 		self.set(packet)
 		self.show()
 
-	##
-	# UTILS
-	##
-
-	@staticmethod
-	def shift_this(number, high_first=True):
-		"""Utility method: extracts MSB and LSB from number.
-
-		Args:
-		number - number to shift
-		high_first - MSB or LSB first (true / false)
-
-		Returns:
-		(high, low) - tuple with shifted values
-
-		"""
-		low = (number & 0xFF)
-		high = ((number >> 8) & 0xFF)
-		if (high_first):
-			return((high, low))
-		else:
-			return((low, high))
-		print("Something went wrong")
-		return False
-
-	@staticmethod
-	def put_in_range(number, range_min, range_max, make_even=True):
-		"""Utility method: sets number in defined range.
-
-		Args:
-		number - number to use
-		range_min - lowest possible number
-		range_max - highest possible number
-		make_even - should number be made even
-
-		Returns:
-		number - number in correct range
-
-		"""
-		if (number < range_min):
-			number = range_min
-		if (number > range_max):
-			number = range_max
-		if (make_even and number % 2 != 0):
-			number += 1
-		return number
-
 
 if __name__ == '__main__':
 	print("===================================")
@@ -357,6 +324,7 @@ if __name__ == '__main__':
 	a.set_net(129)
 	a.set_subnet(16)
 
+	# Look at the object state
 	print(a)
 
 	a.set_single_value(13, 255)
@@ -372,4 +340,5 @@ if __name__ == '__main__':
 
 	print("Values sent")
 
+	# Cleanup when you are done
 	del a
