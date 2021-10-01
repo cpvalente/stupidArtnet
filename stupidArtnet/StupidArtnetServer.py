@@ -19,12 +19,13 @@ class StupidArtnetServer():
     ARTDMX_HEADER = b'Art-Net\x00\x00P\x00\x0e'
     callback = None
 
-    def __init__(self, universe=0, callback_function=None):
+    def __init__(self, universe=0, subnet=0, callback_function=None):
         """Class Initialization."""
 
         self.listen = True
 
         self.universe = universe
+        self.subnet = subnet
         self.buffer = []
         self.callback = callback_function
 
@@ -45,7 +46,7 @@ class StupidArtnetServer():
             if self.validateHeader(data):
 
                 # is it the universe we are listening to
-                if (data[14] == self.universe):
+                if (data[14] == (16 * self.subnet + self.universe)):
                     self.buffer = list(data)[18:]
 
                     # check for registered callbacks
@@ -91,17 +92,13 @@ class StupidArtnetServer():
     @staticmethod
     def validateHeader(header):
         """Validates packet header as Art-Net packet.
-
         - The packet header spells Art-Net
         - The definition is for DMX Artnet (OPCode 0x50)
         - The protocol version is 15
-
         Args:
         header - Packet header as bytearray
-
         Returns:
         boolean - comparison value
-
         """
 
         return (header[:12] == StupidArtnetServer.ARTDMX_HEADER)
@@ -118,11 +115,12 @@ if __name__ == '__main__':
     print("===================================")
     print("Namespace run")
 
-    universe = 1
+    universe = 0
+    subnet = 0
 
     # Initilize server with a universe to listen to
     # And set a callback
-    a = StupidArtnetServer(universe, testCallback)
+    a = StupidArtnetServer(universe, subnet, testCallback)
     print(a)
 
     # giving it some time for the demo
