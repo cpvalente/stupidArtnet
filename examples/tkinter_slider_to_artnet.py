@@ -8,8 +8,9 @@
 
 """
 
-from stupidArtnet.StupidArtnet import StupidArtnet
 from tkinter import *
+
+from stupidArtnet import StupidArtnetServer
 
 
 def updateValue(val):
@@ -37,7 +38,7 @@ def cleanup():
 # -------------
 
 # Create artnet object
-stupid = StupidArtnet()
+stupid = StupidArtnetServer()
 
 # Start persistent thread
 stupid.start()

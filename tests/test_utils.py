@@ -1,5 +1,5 @@
 import unittest
-from ArtnetUtils import shift_this, put_in_range, make_address_mask
+from stupidArtnet.ArtnetUtils import shift_this, put_in_range, make_address_mask
 
 
 class Test(unittest.TestCase):

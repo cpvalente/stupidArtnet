@@ -1,6 +1,7 @@
-import unittest
-from StupidArtnet import StupidArtnet
 import socket
+import unittest
+
+from stupidArtnet import StupidArtnet
 
 
 class Test(unittest.TestCase):

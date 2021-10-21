@@ -1,4 +1,4 @@
-from stupidArtnet.StupidArtnet import StupidArtnet
+from stupidArtnet import StupidArtnet
 import time
 import random
 
@@ -26,7 +26,7 @@ print(a)
 # YOU CAN CREATE YOUR OWN BYTE ARRAY OF PACKET_SIZE
 packet = bytearray(packet_size)		# create packet for Artnet
 for i in range(packet_size):			# fill packet with sequential values
-	packet[i] = (i % 256)
+    packet[i] = (i % 256)
 
 # ... AND SET IT TO STUPID ARTNET
 a.set(packet)						# only on changes
@@ -52,10 +52,10 @@ a.start()							# start continuos sendin
 
 # AND MODIFY THE DATA AS YOU GO
 for x in range(100):
-	for i in range(packet_size):  	# Fill buffer with random stuff
-		packet[i] = random.randint(0, 255)
-	a.set(packet)
-	time.sleep(.2)
+    for i in range(packet_size):  	# Fill buffer with random stuff
+        packet[i] = random.randint(0, 255)
+    a.set(packet)
+    time.sleep(.2)
 
 # SOME DEVICES WOULD HOLD LAST DATA, TURN ALL OFF WHEN DONE
 

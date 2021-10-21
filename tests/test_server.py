@@ -1,7 +1,8 @@
-import unittest
-from StupidArtnetServer import StupidArtnetServer
-import socket
 import time
+import socket
+import unittest
+
+from stupidArtnet import StupidArtnetServer
 
 
 class Test(unittest.TestCase):

@@ -47,13 +47,13 @@ time.sleep(3)
 buffer = a.get_buffer(u1_listener)
 
 # Remember to check the buffer size, as this may vary from 512
-print(len(buffer))
+n_data = len(buffer)
+if (n_data > 0):
+    # in which channel 1 would be
+    buffer[0]
 
-# in which channel 1 would be
-buffer[0]
-
-# and channel 20 would be
-buffer[19]
+    # and channel 20 would be
+    buffer[19]
 
 # Cleanup when you are done
 del a
