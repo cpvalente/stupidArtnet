@@ -11,7 +11,7 @@ NOTES
 
 import socket
 from threading import Thread
-from ArtnetUtils import shift_this, make_address_mask
+from stupidArtnet.ArtnetUtils import make_address_mask
 
 
 class StupidArtnetServer():

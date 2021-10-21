@@ -10,7 +10,7 @@ NOTES
 
 import socket
 from threading import Timer
-from ArtnetUtils import shift_this, put_in_range
+from stupidArtnet.ArtnetUtils import shift_this, put_in_range
 
 
 class StupidArtnet():
