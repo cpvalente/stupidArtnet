@@ -3,8 +3,19 @@
 
 # StupidArtnet
 
-(Very) Simple Artnet implementation in Python
+(Very) Simple Art-Net implementation in Python
 
+#### Table of Contents
+- [Installing from github](#installing-from-github)
+- [Installing from Pip](#installing-from-pip)
+- [Server Basics](#receiving-data)
+- [Client Basics](#basics)
+- [Persistent sending](#persistent-sending)
+- [Example code](#example-code)
+- [Notes](#notes)
+- [Art-Net](#art-net)
+- [Nets and Subnets](#nets-and-subnets)
+- [License](#license)
 
 ### Installing from github
 You can get up and running quickly cloning from github.
@@ -18,36 +29,16 @@ $ python3 examples/example.py
 The project is now available in [Pip](https://pypi.org/project/stupidArtnet/1.0/) and can be installed with
 ```pip install stupidartnet```
 
-### Basics
-Sending simple Artnet packets is pretty easy
+### Receiving Data
+You can use the server module to receive Art-Net data
 ```python
-# A StupidArtnet instance holds a target IP / universe and a buffer
-a = StupidArtnet(target_ip, universe, packet_size)
+# a StupidArtnetServer can listen to a specific universe
+# and return new data to a user defined callback
+a = StupidArtnetServer(universe=0, callback_function=test_callback)
 
-# YOU CAN CREATE YOUR OWN BYTE ARRAY OF PACKET_SIZE
-packet = bytearray(packet_size)
-for i in range(packet_size):
-	packet[i] = (i % 256)
-
-# ... AND SET IT TO STUPID ARTNET
-a.set(packet)
-
-# YOU CAN CHANGE SINGLE VALUES
-a.set_single_value(address, value)
-
-# ... AND THE DATA
-a.show()
-
-# THE DATA IS SAVED IN THE INSTANCE BUFFER
-# YOU CAN SEND THE LAST BUFFER AGAIN BY CALLING .show()
-a.show()
-
-# I HAVE ALSO ADDED AN UTILITY FUNCITON .send()
-# THIS WOULD TAKE THE EFFECT OF SETTING THE BUFFER
-# AND CALLING SHOW
-# a.set(packet)
-# a.show()
-a.send(packet)
+# if you prefer, you can also inspect the latest
+# received data yourself
+buffer = a.get_buffer()
 
 ```
 ### Persistent sending
@@ -72,6 +63,8 @@ a.stop()
 ### Example code
 See examples folder inside the package directory
 - [x] Use with Tkinter
+- [x] Send Art-Net (client)
+- [x] Receive Art-Net (server)
 
 ### Notes
 
@@ -145,7 +138,7 @@ a.set_simplified(False)
 
 # Add net and subnet value
 # Values here are 0 based
-a.universe(15)
+a.set_universe(15)
 a.set_subnet(15)
 a.set_net(127)
 ```
