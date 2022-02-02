@@ -11,7 +11,7 @@ NOTES
 import socket
 from threading import Timer
 from stupidArtnet.ArtnetUtils import shift_this, put_in_range
-
+from time import sleep
 
 class StupidArtnet():
 	"""(Very) simple implementation of Artnet."""
@@ -301,11 +301,15 @@ class StupidArtnet():
 		self.clear()
 		self.show()
 
-	def flash_all(self):
+	def flash_all(self, delay=None):
 		"""Sends 255's all across."""
 		packet = [255] * self.PACKET_SIZE
 		self.set(packet)
 		self.show()
+		# Blackout after delay
+		if delay:
+			sleep(delay)
+			self.blackout()
 
 
 if __name__ == '__main__':
