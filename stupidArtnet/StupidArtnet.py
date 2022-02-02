@@ -303,10 +303,7 @@ class StupidArtnet():
 
 	def flash_all(self):
 		"""Sends 255's all across."""
-		packet = bytearray(self.PACKET_SIZE)
-		[255 for i in packet]
-		# for i in range(self.PACKET_SIZE):
-		# 	packet[i] = 255
+		packet = [255] * self.PACKET_SIZE
 		self.set(packet)
 		self.show()
 
