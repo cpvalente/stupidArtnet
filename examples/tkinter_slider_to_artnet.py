@@ -12,13 +12,17 @@ from tkinter import *
 
 from stupidArtnet import StupidArtnet
 
+# Declare globals
+stupid = None
+window = None
 
-def updateValue(val):
+
+def updateValue(slider_value):
     """Callback from slider onchange.
     Sends the value of the slider to the artnet channel."""
 
     global stupid
-    stupid.set_single_value(1, slider_val.get())
+    stupid.set_single_value(1, slider_value)
 
 
 def cleanup():
