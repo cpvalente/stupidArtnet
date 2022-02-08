@@ -19,7 +19,8 @@ class StupidArtnet():
 
     UDP_PORT = 6454
 
-    def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30, even_packet_size=True, broadcast=False):
+    def __init__(self, targetIP='127.0.0.1', universe=0, packet_size=512, fps=30,
+                 even_packet_size=True, broadcast=False):
         """Initializes Art-Net Client.
 
         Args:
@@ -263,7 +264,6 @@ class StupidArtnet():
 
 
 #### AUX Functions ####
-
 
     def send(self, p):
         """Set buffer and send straightaway.
