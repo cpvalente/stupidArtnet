@@ -57,6 +57,7 @@ class StupidArtnet():
 
 		# Timer
 		self.fps = fps
+		self.__clock = None
 
 		self.make_header()
 
