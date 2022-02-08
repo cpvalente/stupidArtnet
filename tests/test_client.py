@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         self.sock.close()
 
         # destroy artnet instance
-        del(self.stupid)
+        del self.stupid
 
     def test_header(self):
         """Assert Art-Net header."""

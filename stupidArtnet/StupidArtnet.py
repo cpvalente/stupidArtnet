@@ -72,7 +72,7 @@ class StupidArtnet():
 		s += "Stupid Artnet initialized\n"
 		s += "Target IP: %s:%i \n" % (self.TARGET_IP, self.UDP_PORT)
 		s += "Universe: %i \n" % self.UNIVERSE
-		if not (self.bIsSimplified):
+		if not self.bIsSimplified:
 			s += "Subnet: %i \n" % self.SUB
 			s += "Net: %i \n" % self.NET
 		s += "Packet Size: %i \n" % self.PACKET_SIZE
@@ -97,7 +97,7 @@ class StupidArtnet():
 		# 13 - physical port (int 8)
 		self.HEADER.append(0x00)
 		# 14 - universe, (2 x 8 low byte first)
-		if (self.bIsSimplified):
+		if self.bIsSimplified:
 			# not quite correct but good enough for most cases:
 			# the whole net subnet is simplified
 			# by transforming a single uint16 into its 8 bit parts
@@ -167,7 +167,7 @@ class StupidArtnet():
 		# This is ugly, trying to keep interface easy
 		# With simplified mode the universe will be split into two
 		# values, (uni and sub) which is correct anyway. Net will always be 0
-		if (self.bIsSimplified):
+		if self.bIsSimplified:
 			self.UNIVERSE = put_in_range(universe, 0, 255, False)
 		else:
 			self.UNIVERSE = put_in_range(universe, 0, 15, False)
@@ -220,7 +220,7 @@ class StupidArtnet():
 		value = put_in_range(value, 0, 65535, False)
 
 		# Check for endianess
-		if (high_first):
+		if high_first:
 			self.BUFFER[address - 1] = (value >> 8) & 0xFF  # high
 			self.BUFFER[address] = (value) & 0xFF 			# low
 		else:
@@ -281,7 +281,7 @@ class StupidArtnet():
 		False - Headers sends Universe - Net and Subnet values as protocol
 		It is recommended that you set these values with .set_net() and set_physical
 		"""
-		if (bDoSimplify == self.bIsSimplified):
+		if bDoSimplify == self.bIsSimplified:
 			return
 		self.bIsSimplified = bDoSimplify
 		self.make_header()

@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         self.sock.close()
 
         # destroy artnet instance
-        del(self.stupid)
+        del self.stupid
 
     def test_buffer(self):
         """Assert that server received data and filtered correctly."""

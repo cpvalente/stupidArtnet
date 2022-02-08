@@ -49,7 +49,7 @@ buffer = a.get_buffer(u1_listener)
 
 # Remember to check the buffer size, as this may vary from 512
 n_data = len(buffer)
-if (n_data > 0):
+if n_data > 0:
     # in which channel 1 would be
     print('Channel 1: ', buffer[0])
 
