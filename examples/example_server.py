@@ -4,6 +4,7 @@ import time
 
 # create a callback to handle data when received
 def test_callback(data):
+    """Test function to receive callback data."""
     # the received data is an array
     # of the channels value (no headers)
     print('Received new data \n', data)

@@ -1,10 +1,10 @@
 """(Very) Simple Example of using Tkinter with StupidArtnet.
 
-    It creates a simple window with a slider of value 0-255
-    This value is streamed in universe 0 channel 1
+It creates a simple window with a slider of value 0-255
+This value is streamed in universe 0 channel 1
 
-    Note: The example imports stupid artnet locally from
-    a parent folder, real use import would be simpler
+Note: The example imports stupid artnet locally from
+a parent folder, real use import would be simpler
 
 """
 
@@ -19,7 +19,8 @@ window = None
 
 def updateValue(slider_value):
     """Callback from slider onchange.
-    Sends the value of the slider to the artnet channel."""
+    Sends the value of the slider to the artnet channel.
+    """
 
     global stupid
     stupid.set_single_value(1, slider_value)
@@ -27,7 +28,8 @@ def updateValue(slider_value):
 
 def cleanup():
     """Cleanup function for when window is closed.
-    Closes socket and destroys object."""
+    Closes socket and destroys object.
+    """
     print('cleanup')
 
     global stupid
