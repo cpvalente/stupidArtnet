@@ -20,7 +20,7 @@ class StupidArtnetServer():
     UDP_PORT = 6454
     s = None
     ARTDMX_HEADER = b'Art-Net\x00\x00P\x00\x0e'
-    listeners = list()
+    listeners = []
 
     def __init__(self):
         """Initializes Art-Net server."""
@@ -32,6 +32,8 @@ class StupidArtnetServer():
         self.th.start()
 
     def __init_socket(self):
+        """Initializes server socket."""
+
         # Bind to UDP on the correct PORT
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -39,7 +41,7 @@ class StupidArtnetServer():
 
         while self.listen:
 
-            data, addr = self.s.recvfrom(1024)
+            data, unused_address = self.s.recvfrom(1024)
 
             # only dealing with Art-Net DMX
             if self.validate_header(data):
@@ -48,11 +50,11 @@ class StupidArtnetServer():
                 for listener in self.listeners:
 
                     # is it the address we are listening to
-                    if (listener['address_mask'] == data[14:16]):
+                    if listener['address_mask'] == data[14:16]:
                         listener['buffer'] = list(data)[18:]
 
                         # check for registered callbacks
-                        if (listener['callback'] != None):
+                        if listener['callback'] is not None:
                             listener['callback'](listener['buffer'])
 
     def __del__(self):
@@ -182,6 +184,7 @@ class StupidArtnetServer():
 
 
 def test_callback(data):
+    """Test function, receives data from server callback."""
     print('Received new data \n', data)
 
 
