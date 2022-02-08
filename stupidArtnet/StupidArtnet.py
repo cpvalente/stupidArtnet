@@ -41,8 +41,7 @@ class StupidArtnet():
 		self.UNIVERSE = universe
 		self.SUB = 0
 		self.NET = 0
-		self.PACKET_SIZE = put_in_range(
-		    packet_size, 2, 512, even_packet_size)
+		self.PACKET_SIZE = put_in_range(packet_size, 2, 512, even_packet_size)
 		self.HEADER = bytearray()
 		self.BUFFER = bytearray(self.PACKET_SIZE)
 
@@ -263,9 +262,9 @@ class StupidArtnet():
 		self.BUFFER[address] = put_in_range(g, 0, 255, False)
 		self.BUFFER[address + 1] = put_in_range(b, 0, 255, False)
 
-	##
-	# AUX
-	##
+
+#### AUX Functions ####
+
 
 	def send(self, p):
 		"""Set buffer and send straightaway.
