@@ -35,7 +35,6 @@ class StupidArtnet():
         None
 
         """
-
         # Instance variables
         self.TARGET_IP = targetIP
         self.SEQUENCE = 0
