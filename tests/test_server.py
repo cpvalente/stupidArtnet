@@ -14,7 +14,6 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         """Creates UDP Client."""
-
         # Create a dummy UDP Client
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -43,7 +42,6 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         """Destroy Objects."""
-
         # destroy UDP Server
         self.sock.close()
 
@@ -52,7 +50,6 @@ class Test(unittest.TestCase):
 
     def test_buffer(self):
         """Assert that server received data and filtered correctly."""
-
         buffer = self.stupid.get_buffer(self.listener)
 
         # Test with a artnet header
@@ -60,7 +57,6 @@ class Test(unittest.TestCase):
 
     def test_header(self):
         """Assert Art-Net header."""
-
         artdmx = b'Art-Net\x00\x00P\x00\x0e'
         typo = b'Art-Net\x00\x00\x00\x0e'
 

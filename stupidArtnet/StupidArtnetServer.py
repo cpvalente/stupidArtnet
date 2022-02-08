@@ -24,7 +24,6 @@ class StupidArtnetServer():
 
     def __init__(self):
         """Initializes Art-Net server."""
-
         # server active flag
         self.listen = True
 
@@ -33,7 +32,6 @@ class StupidArtnetServer():
 
     def __init_socket(self):
         """Initializes server socket."""
-
         # Bind to UDP on the correct PORT
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -68,7 +66,8 @@ class StupidArtnetServer():
         s += "Stupid Artnet Listening\n"
         return s
 
-    def register_listener(self, universe=0, sub=0, net=0, is_simplified=True, callback_function=None):
+    def register_listener(self, universe=0, sub=0, net=0,
+                          is_simplified=True, callback_function=None):
         """Adds a listener to an Art-Net Universe.
 
         Args:
@@ -82,7 +81,6 @@ class StupidArtnetServer():
         Returns:
         id - id of listener, used to delete listener if required
         """
-
         listener_id = len(self.listeners)
         new_listener = {
             'id': listener_id,
@@ -128,7 +126,7 @@ class StupidArtnetServer():
         """Return buffer values."""
         for listener in self.listeners:
             if listener.get('id') == listener_id:
-                return(listener.get('buffer'))
+                return listener.get('buffer')
 
     def clear_buffer(self, listener_id):
         """Clear buffer in listener."""
@@ -142,7 +140,8 @@ class StupidArtnetServer():
             if listener.get('id') == listener_id:
                 listener['callback'] = callback_function
 
-    def set_address_filter(self, listener_id, universe, sub=0, net=0, is_simplified=True):
+    def set_address_filter(self, listener_id, universe, sub=0, net=0,
+                           is_simplified=True):
         """Add / change filter to existing listener."""
         # make mask bytes
         address_mask = make_address_mask(
@@ -175,7 +174,6 @@ class StupidArtnetServer():
         boolean - comparison value
 
         """
-
         return header[:12] == StupidArtnetServer.ARTDMX_HEADER
 
 

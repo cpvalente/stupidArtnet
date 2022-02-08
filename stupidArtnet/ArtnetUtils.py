@@ -9,7 +9,6 @@ def shift_this(number, high_first=True):
     (high, low) - tuple with shifted values
 
     """
-
     low = (number & 0xFF)
     high = ((number >> 8) & 0xFF)
     if high_first:
@@ -30,7 +29,6 @@ def put_in_range(number, range_min, range_max, make_even=True):
     number - number in correct range
 
     """
-
     number = max(range_min, min(number, range_max))
     if (make_even and number % 2 != 0):
         number += 1
@@ -51,7 +49,6 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
     bytes - byte mask for given address
 
     """
-
     address_mask = bytearray()
 
     if is_simplified:

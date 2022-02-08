@@ -12,7 +12,6 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         """Creates UDP Server and Art-Net Client."""
-
         # Create dummy UDP Server
         self.sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -33,7 +32,6 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         """Destroy Objects."""
-
         # destroy UDP Server
         self.sock.close()
 

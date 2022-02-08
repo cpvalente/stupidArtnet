@@ -21,7 +21,6 @@ def updateValue(slider_value):
     """Callback from slider onchange.
     Sends the value of the slider to the artnet channel.
     """
-
     global stupid
     stupid.set_single_value(1, int(slider_value))
 

@@ -154,7 +154,7 @@ class StupidArtnet():
         """Stops thread clock."""
         self.__clock.cancel()
 
-     # SETTERS - HEADER #
+    # SETTERS - HEADER #
 
     def set_universe(self, universe):
         """Setter for universe (0 - 15 / 256).
@@ -256,7 +256,7 @@ class StupidArtnet():
         self.BUFFER[address] = put_in_range(g, 0, 255, False)
         self.BUFFER[address + 1] = put_in_range(b, 0, 255, False)
 
-     # AUX Function #
+    # AUX Function #
 
     def send(self, p):
         """Set buffer and send straightaway.
