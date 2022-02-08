@@ -5,6 +5,7 @@ from stupidArtnet import StupidArtnet
 
 
 class Test(unittest.TestCase):
+    """Test class for Artnet client."""
 
     # Art-Net stuff
     header_size = 18

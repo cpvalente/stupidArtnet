@@ -141,9 +141,7 @@ class StupidArtnet():
         """Close UDP socket."""
         self.s.close()
 
-    ##
-    # THREADING
-    ##
+    # THREADING #
 
     def start(self):
         """Starts thread clock."""
@@ -156,9 +154,7 @@ class StupidArtnet():
         """Stops thread clock."""
         self.__clock.cancel()
 
-    ##
-    # SETTERS - HEADER
-    ##
+     # SETTERS - HEADER #
 
     def set_universe(self, universe):
         """Setter for universe (0 - 15 / 256).
@@ -195,9 +191,7 @@ class StupidArtnet():
         self.PACKET_SIZE = put_in_range(packet_size, 2, 512, self.bMakeEven)
         self.make_header()
 
-    ##
-    # SETTERS - DATA
-    ##
+    # SETTERS - DATA #
 
     def clear(self):
         """Clear DMX buffer."""
@@ -262,8 +256,7 @@ class StupidArtnet():
         self.BUFFER[address] = put_in_range(g, 0, 255, False)
         self.BUFFER[address + 1] = put_in_range(b, 0, 255, False)
 
-
-#### AUX Functions ####
+     # AUX Function #
 
     def send(self, p):
         """Set buffer and send straightaway.

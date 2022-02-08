@@ -6,6 +6,8 @@ from stupidArtnet import StupidArtnetServer
 
 
 class Test(unittest.TestCase):
+    """Test class for Artnet server."""
+
     artnet_header = b'Art-Net\x00\x00P\x00\x0e\x00\x00\x00\x00\x00\x08'
     dmx_packet = [1, 2, 3, 4, 5, 6, 7, 8]
     dmx_packet_bytes = b'\x01\x02\x03\x04\x05\x06\x07\x08'

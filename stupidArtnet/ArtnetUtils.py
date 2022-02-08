@@ -45,7 +45,8 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
     universe - Universe to listen
     sub - Subnet to listen
     net - Net to listen
-    is_simplified - Wheter to use nets and subnet or simpler definition for universe only, see User Guide page 5 (Universe Addressing)
+    is_simplified - Whether to use nets and subnet or universe only,
+    see User Guide page 5 (Universe Addressing)
 
     Returns:
     bytes - byte mask for given address

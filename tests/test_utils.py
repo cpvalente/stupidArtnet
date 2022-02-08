@@ -3,6 +3,7 @@ from stupidArtnet.ArtnetUtils import shift_this, put_in_range, make_address_mask
 
 
 class Test(unittest.TestCase):
+    """Test class for Artnet Utilities."""
 
     def test_shift(self):
         """Test shift_this utility."""

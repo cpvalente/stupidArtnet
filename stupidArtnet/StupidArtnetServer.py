@@ -75,7 +75,8 @@ class StupidArtnetServer():
         universe - Universe to listen
         sub - Subnet to listen
         net - Net to listen
-        is_simplified - Wheter to use nets and subnet or simpler definition for universe only, see User Guide page 5 (Universe Addressing)
+        is_simplified - Whether to use nets and subnet or universe only,
+        see User Guide page 5 (Universe Addressing)
         callback_function - Function to call when new packet is received
 
         Returns:
@@ -107,8 +108,6 @@ class StupidArtnetServer():
         self.listeners = [
             i for i in self.listeners if not (i['id'] == listener_id)]
 
-        return None
-
     def delete_all_listener(self):
         """Deletes all registered listeners.
 
@@ -116,7 +115,6 @@ class StupidArtnetServer():
         None
         """
         self.listeners = []
-        return None
 
     def see_buffer(self, listener_id):
         """Show buffer values."""
@@ -131,8 +129,6 @@ class StupidArtnetServer():
         for listener in self.listeners:
             if (listener.get('id') == listener_id):
                 return(listener.get('buffer'))
-
-        return None
 
     def clear_buffer(self, listener_id):
         """Clear buffer in listener."""
