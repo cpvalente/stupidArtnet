@@ -50,10 +50,10 @@ buffer = a.get_buffer(u1_listener)
 n_data = len(buffer)
 if (n_data > 0):
     # in which channel 1 would be
-    buffer[0]
+    print('Channel 1: ', buffer[0])
 
     # and channel 20 would be
-    buffer[19]
+    print('Channel 20: ', buffer[19])
 
 # Cleanup when you are done
 del a
