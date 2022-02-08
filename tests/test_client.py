@@ -5,13 +5,13 @@ from stupidArtnet import StupidArtnet
 
 
 class Test(unittest.TestCase):
+    """Test class for Artnet client."""
 
     # Art-Net stuff
     header_size = 18
 
     def setUp(self):
         """Creates UDP Server and Art-Net Client."""
-
         # Create dummy UDP Server
         self.sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -22,22 +22,21 @@ class Test(unittest.TestCase):
         self.stupid = StupidArtnet(packet_size=24)
 
         # define a packet to send
-        data = [x for x in range(25)]
+        data = list(range(25))
 
         # send packet
         self.stupid.send(data)
 
-        # assert result
+        # confirm result
         self.received = self.sock.recv(512)
 
     def tearDown(self):
         """Destroy Objects."""
-
         # destroy UDP Server
         self.sock.close()
 
         # destroy artnet instance
-        del(self.stupid)
+        del self.stupid
 
     def test_header(self):
         """Assert Art-Net header."""

@@ -26,7 +26,7 @@ $ cd stupidArtnet
 $ python3 examples/example.py
 ```
 ### Installing from Pip
-The project is now available in [Pip](https://pypi.org/project/stupidArtnet/1.0/) and can be installed with
+The project is now available in [Pip](https://pypi.org/project/stupidArtnet/) and can be installed with
 ```pip install stupidartnet```
 
 ### Receiving Data

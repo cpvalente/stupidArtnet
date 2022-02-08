@@ -4,6 +4,7 @@ import time
 
 # create a callback to handle data when received
 def test_callback(data):
+    """Test function to receive callback data."""
     # the received data is an array
     # of the channels value (no headers)
     print('Received new data \n', data)
@@ -48,12 +49,12 @@ buffer = a.get_buffer(u1_listener)
 
 # Remember to check the buffer size, as this may vary from 512
 n_data = len(buffer)
-if (n_data > 0):
+if n_data > 0:
     # in which channel 1 would be
-    buffer[0]
+    print('Channel 1: ', buffer[0])
 
     # and channel 20 would be
-    buffer[19]
+    print('Channel 20: ', buffer[19])
 
 # Cleanup when you are done
 del a

@@ -9,13 +9,11 @@ def shift_this(number, high_first=True):
     (high, low) - tuple with shifted values
 
     """
-
     low = (number & 0xFF)
     high = ((number >> 8) & 0xFF)
-    if (high_first):
+    if high_first:
         return((high, low))
-    else:
-        return((low, high))
+    return((low, high))
 
 
 def put_in_range(number, range_min, range_max, make_even=True):
@@ -31,7 +29,6 @@ def put_in_range(number, range_min, range_max, make_even=True):
     number - number in correct range
 
     """
-
     number = max(range_min, min(number, range_max))
     if (make_even and number % 2 != 0):
         number += 1
@@ -45,16 +42,16 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
     universe - Universe to listen
     sub - Subnet to listen
     net - Net to listen
-    is_simplified - Wheter to use nets and subnet or simpler definition for universe only, see User Guide page 5 (Universe Addressing)
+    is_simplified - Whether to use nets and subnet or universe only,
+    see User Guide page 5 (Universe Addressing)
 
     Returns:
     bytes - byte mask for given address
 
     """
-
     address_mask = bytearray()
 
-    if (is_simplified):
+    if is_simplified:
         # Ensure data is in right range
         universe = max(0, min(universe, 15))
 

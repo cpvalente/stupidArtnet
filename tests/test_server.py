@@ -6,13 +6,14 @@ from stupidArtnet import StupidArtnetServer
 
 
 class Test(unittest.TestCase):
+    """Test class for Artnet server."""
+
     artnet_header = b'Art-Net\x00\x00P\x00\x0e\x00\x00\x00\x00\x00\x08'
     dmx_packet = [1, 2, 3, 4, 5, 6, 7, 8]
     dmx_packet_bytes = b'\x01\x02\x03\x04\x05\x06\x07\x08'
 
     def setUp(self):
         """Creates UDP Client."""
-
         # Create a dummy UDP Client
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -41,16 +42,14 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         """Destroy Objects."""
-
         # destroy UDP Server
         self.sock.close()
 
         # destroy artnet instance
-        del(self.stupid)
+        del self.stupid
 
     def test_buffer(self):
         """Assert that server received data and filtered correctly."""
-
         buffer = self.stupid.get_buffer(self.listener)
 
         # Test with a artnet header
@@ -58,7 +57,6 @@ class Test(unittest.TestCase):
 
     def test_header(self):
         """Assert Art-Net header."""
-
         artdmx = b'Art-Net\x00\x00P\x00\x0e'
         typo = b'Art-Net\x00\x00\x00\x0e'
 

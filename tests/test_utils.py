@@ -3,10 +3,10 @@ from stupidArtnet.ArtnetUtils import shift_this, put_in_range, make_address_mask
 
 
 class Test(unittest.TestCase):
+    """Test class for Artnet Utilities."""
 
     def test_shift(self):
         """Test shift_this utility."""
-
         # send a 1
         self.assertEqual(shift_this(1), (0, 1))
 
@@ -29,7 +29,6 @@ class Test(unittest.TestCase):
 
     def test_range(self):
         """Test put_in_range utility."""
-
         # send a 1 from 0, 512, even
         self.assertEqual(put_in_range(1, 0, 512), (2))
 
@@ -49,7 +48,6 @@ class Test(unittest.TestCase):
 
     def test_mask(self):
         """Test mask."""
-
         # send universe 8, simplified
         self.assertEqual(make_address_mask(8), b'\x08\x00')
 
