@@ -22,12 +22,12 @@ class Test(unittest.TestCase):
         self.stupid = StupidArtnet(packet_size=24)
 
         # define a packet to send
-        data = [x for x in range(25)]
+        data = list(range(25))
 
         # send packet
         self.stupid.send(data)
 
-        # assert result
+        # confirm result
         self.received = self.sock.recv(512)
 
     def tearDown(self):
