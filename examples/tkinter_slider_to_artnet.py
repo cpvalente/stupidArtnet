@@ -23,7 +23,7 @@ def updateValue(slider_value):
     """
 
     global stupid
-    stupid.set_single_value(1, slider_value)
+    stupid.set_single_value(1, int(slider_value))
 
 
 def cleanup():
