@@ -106,7 +106,7 @@ class StupidArtnetServer():
         None
         """
         self.listeners = [
-            i for i in self.listeners if not (i['id'] == listener_id)]
+            i for i in self.listeners if not i['id'] == listener_id]
 
     def delete_all_listener(self):
         """Deletes all registered listeners.
@@ -119,7 +119,7 @@ class StupidArtnetServer():
     def see_buffer(self, listener_id):
         """Show buffer values."""
         for listener in self.listeners:
-            if (listener.get('id') == listener_id):
+            if listener.get('id') == listener_id:
                 print(listener.get('buffer'))
 
         return "Listener not found"
@@ -127,19 +127,19 @@ class StupidArtnetServer():
     def get_buffer(self, listener_id):
         """Return buffer values."""
         for listener in self.listeners:
-            if (listener.get('id') == listener_id):
+            if listener.get('id') == listener_id:
                 return(listener.get('buffer'))
 
     def clear_buffer(self, listener_id):
         """Clear buffer in listener."""
         for listener in self.listeners:
-            if (listener.get('id') == listener_id):
+            if listener.get('id') == listener_id:
                 listener['buffer'] = []
 
     def set_callback(self, listener_id, callback_function):
         """Add / change callback to a given listener."""
         for listener in self.listeners:
-            if (listener.get('id') == listener_id):
+            if listener.get('id') == listener_id:
                 listener['callback'] = callback_function
 
     def set_address_filter(self, listener_id, universe, sub=0, net=0, is_simplified=True):
@@ -150,7 +150,7 @@ class StupidArtnetServer():
 
         # find listener
         for listener in self.listeners:
-            if (listener.get('id') == listener_id):
+            if listener.get('id') == listener_id:
                 listener['simplified'] = is_simplified
                 listener['address_mask'] = address_mask
                 listener['buffer'] = []
@@ -176,7 +176,7 @@ class StupidArtnetServer():
 
         """
 
-        return (header[:12] == StupidArtnetServer.ARTDMX_HEADER)
+        return header[:12] == StupidArtnetServer.ARTDMX_HEADER
 
 
 def test_callback(data):

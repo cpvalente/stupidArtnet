@@ -12,10 +12,9 @@ def shift_this(number, high_first=True):
 
     low = (number & 0xFF)
     high = ((number >> 8) & 0xFF)
-    if (high_first):
+    if high_first:
         return((high, low))
-    else:
-        return((low, high))
+    return((low, high))
 
 
 def put_in_range(number, range_min, range_max, make_even=True):
@@ -55,7 +54,7 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
 
     address_mask = bytearray()
 
-    if (is_simplified):
+    if is_simplified:
         # Ensure data is in right range
         universe = max(0, min(universe, 15))
 
