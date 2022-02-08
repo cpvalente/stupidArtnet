@@ -129,7 +129,7 @@ class StupidArtnet():
 		packet.extend(self.BUFFER)
 		try:
 			self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
-		except Exception as e:
+		except socket.error as e:
 			print("ERROR: Socket error with exception: %s" % e)
 		finally:
 			self.SEQUENCE = (self.SEQUENCE + 1) % 256
