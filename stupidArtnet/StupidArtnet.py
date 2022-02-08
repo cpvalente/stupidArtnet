@@ -151,10 +151,8 @@ class StupidArtnet():
 
 	def stop(self):
 		"""Stops thread clock."""
-		try:
-			self.__clock.cancel()
-		except:
-			pass
+		self.__clock.cancel()
+
 
 	##
 	# SETTERS - HEADER
