@@ -71,12 +71,12 @@ class StupidArtnet():
         """Printable object state."""
         s = "===================================\n"
         s += "Stupid Artnet initialized\n"
-        s += "Target IP: %s:%i \n" % (self.TARGET_IP, self.UDP_PORT)
-        s += "Universe: %i \n" % self.UNIVERSE
+        s += f"Target IP: {self.TARGET_IP} : {self.UDP_PORT} \n"
+        s += f"Universe: {self.UNIVERSE} \n"
         if not self.bIsSimplified:
-            s += "Subnet: %i \n" % self.SUB
-            s += "Net: %i \n" % self.NET
-        s += "Packet Size: %i \n" % self.PACKET_SIZE
+            s += f"Subnet: {self.SUB} \n"
+            s += f"Net: {self.NET} \n"
+        s += f"Packet Size: {self.PACKET_SIZE} \n"
         s += "==================================="
 
         return s
@@ -132,7 +132,7 @@ class StupidArtnet():
         try:
             self.s.sendto(packet, (self.TARGET_IP, self.UDP_PORT))
         except socket.error as e:
-            print("ERROR: Socket error with exception: %s" % e)
+            print(f"ERROR: Socket error with exception: {e}")
         finally:
             self.SEQUENCE = (self.SEQUENCE + 1) % 256
 
