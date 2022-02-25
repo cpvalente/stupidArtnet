@@ -10,8 +10,8 @@ NOTES
 
 import socket
 from threading import Timer
-from stupidArtnet.ArtnetUtils import shift_this, put_in_range
 from time import sleep
+from stupidArtnet.ArtnetUtils import shift_this, put_in_range
 
 
 class StupidArtnet():
