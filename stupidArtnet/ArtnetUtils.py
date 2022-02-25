@@ -61,9 +61,9 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
         universe = max(0, min(universe, 15))
 
         # Make mask
-        a = shift_this(universe)  # convert to MSB / LSB
-        address_mask.append(a[1])
-        address_mask.append(a[0])
+        msb, lsb = shift_this(universe)  # convert to MSB / LSB
+        address_mask.append(lsb)
+        address_mask.append(msb)
     else:
         # Ensure data is in right range
         universe = max(0, min(universe, 15))
