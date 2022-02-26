@@ -85,8 +85,7 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
 
     if is_simplified:
         # Ensure data is in right range
-        # TODO: this should be limit of universes
-        universe = clamp(universe, 0, 15)
+        universe = clamp(universe, 0, 32768)
 
         # Make mask
         msb, lsb = shift_this(universe)  # convert to MSB / LSB
