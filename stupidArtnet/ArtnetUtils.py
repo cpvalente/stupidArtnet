@@ -23,7 +23,6 @@ def clamp(number, min_val, max_val):
     number - number to use
     range_min - lowest possible number
     range_max - highest possible number
-    make_even - should number be made even
 
     Returns:
     number - number in correct range
@@ -32,7 +31,7 @@ def clamp(number, min_val, max_val):
     return max(min_val, min(number, max_val))
 
 
-def make_even(number):
+def set_even(number):
     """Utility method: ensures number is even by adding.
 
     Args:
@@ -42,7 +41,7 @@ def make_even(number):
     number - even number
     """
 
-    if (make_even and number % 2 != 0):
+    if (number % 2 != 0):
         number += 1
     return number
 
@@ -63,7 +62,7 @@ def put_in_range(number, range_min, range_max, make_even=True):
     """
     number = clamp(number, range_min, range_max)
     if (make_even):
-        number = make_even(number)
+        number = set_even(number)
     return number
 
 
