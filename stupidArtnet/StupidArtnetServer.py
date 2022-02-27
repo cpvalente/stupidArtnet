@@ -127,6 +127,8 @@ class StupidArtnetServer():
         for listener in self.listeners:
             if listener.get('id') == listener_id:
                 return listener.get('buffer')
+        print("Buffer object not found")
+        return []
 
     def clear_buffer(self, listener_id):
         """Clear buffer in listener."""
