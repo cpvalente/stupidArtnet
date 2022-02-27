@@ -1,3 +1,6 @@
+"""Provides common functions byte objects."""
+
+
 def shift_this(number, high_first=True):
     """Utility method: extracts MSB and LSB from number.
 

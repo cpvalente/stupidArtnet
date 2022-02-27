@@ -18,7 +18,7 @@ class StupidArtnetServer():
     """(Very) simple implementation of an Artnet Server."""
 
     UDP_PORT = 6454
-    s = None
+    socket_server = None
     ARTDMX_HEADER = b'Art-Net\x00\x00P\x00\x0e'
     listeners = []
 
@@ -27,19 +27,20 @@ class StupidArtnetServer():
         # server active flag
         self.listen = True
 
-        self.th = Thread(target=self.__init_socket, daemon=True)
-        self.th.start()
+        self.server_thread = Thread(target=self.__init_socket, daemon=True)
+        self.server_thread.start()
 
     def __init_socket(self):
         """Initializes server socket."""
         # Bind to UDP on the correct PORT
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind(('', self.UDP_PORT))  # Listen on any valid IP
+        self.socket_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket_server.setsockopt(
+            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket_server.bind(('', self.UDP_PORT))  # Listen on any valid IP
 
         while self.listen:
 
-            data, unused_address = self.s.recvfrom(1024)
+            data, unused_address = self.socket_server.recvfrom(1024)
 
             # only dealing with Art-Net DMX
             if self.validate_header(data):
@@ -62,9 +63,9 @@ class StupidArtnetServer():
 
     def __str__(self):
         """Printable object state."""
-        s = "===================================\n"
-        s += "Stupid Artnet Listening\n"
-        return s
+        state = "===================================\n"
+        state += "Stupid Artnet Listening\n"
+        return state
 
     def register_listener(self, universe=0, sub=0, net=0,
                           is_simplified=True, callback_function=None):
@@ -118,7 +119,7 @@ class StupidArtnetServer():
         """Show buffer values."""
         for listener in self.listeners:
             if listener.get('id') == listener_id:
-                print(listener.get('buffer'))
+                return listener.get('buffer')
 
         return "Listener not found"
 
@@ -128,6 +129,9 @@ class StupidArtnetServer():
             if listener.get('id') == listener_id:
                 return listener.get('buffer')
         print("Buffer object not found")
+        return []
+
+        print("No Listener with given id found")
         return []
 
     def clear_buffer(self, listener_id):
@@ -159,7 +163,7 @@ class StupidArtnetServer():
     def close(self):
         """Close UDP socket."""
         self.listen = False         # Set flag
-        self.th.join()              # Terminate thread once jobs are complete
+        self.server_thread.join()              # Terminate thread once jobs are complete
 
     @staticmethod
     def validate_header(header):
@@ -194,7 +198,7 @@ if __name__ == '__main__':
     # Art-Net 4 definition specifies nets and subnets
     # Please see README and Art-Net user guide for details
     # Here we use the simplified default
-    universe = 1
+    UNIVERSE_TO_LISTEN = 1
 
     # Initilize server, this starts a server in the Art-Net port
     a = StupidArtnetServer()
@@ -203,7 +207,7 @@ if __name__ == '__main__':
     # add a new listener with a optional callback
     # the return is an id for the listener
     u1_listener = a.register_listener(
-        universe, callback_function=test_callback)
+        UNIVERSE_TO_LISTEN, callback_function=test_callback)
 
     # print object state
     print(a)
