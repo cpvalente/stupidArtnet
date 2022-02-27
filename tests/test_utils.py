@@ -47,18 +47,51 @@ class Test(unittest.TestCase):
         return True
 
     def test_mask(self):
-        """Test mask."""
-        # send universe 8, simplified
+        """Test mask and assert simplified mode."""
         self.assertEqual(make_address_mask(8), b'\x08\x00')
+        self.assertEqual(make_address_mask(8, 0, 0, False), b'\x08\x00')
 
-        # send universe 8, simplified
-        self.assertEqual(make_address_mask(8), b'\x08\x00')
+        self.assertEqual(make_address_mask(15), b'\x0f\x00')
+        self.assertEqual(make_address_mask(15, 0, 0, False),  b'\x0f\x00')
 
-        # send universe 17, simplified
-        self.assertEqual(make_address_mask(17), b'\x0f\x00')
+        self.assertEqual(make_address_mask(16), b'\x10\x00')
+        self.assertEqual(make_address_mask(0, 1, 0, False),  b'\x10\x00')
 
-        # send universe 8, sub 8, net 100
-        self.assertEqual(make_address_mask(8, 8, 100, False), b'\x88\x08')
+        self.assertEqual(make_address_mask(17), b'\x11\x00')
+        self.assertEqual(make_address_mask(1, 1, 0, False),  b'\x11\x00')
+
+        self.assertEqual(make_address_mask(18), b'\x12\x00')
+        self.assertEqual(make_address_mask(2, 1, 0, False),  b'\x12\x00')
+        self.assertEqual(2 + 1 * 16, 18)
+
+        self.assertEqual(make_address_mask(99), b'c\x00')
+        self.assertEqual(make_address_mask(3, 6, 0, False),  b'c\x00')
+        self.assertEqual(3 + 6 * 16, 99)
+
+        self.assertEqual(make_address_mask(255), b'\xff\x00')
+        self.assertEqual(make_address_mask(15, 15, 0, False),  b'\xff\x00')
+        self.assertEqual(15 + 15 * 16, 255)
+
+        self.assertEqual(make_address_mask(256), b'\x00\x01')
+        self.assertEqual(make_address_mask(0, 0, 1, False), b'\x00\x01')
+
+        self.assertEqual(make_address_mask(257), b'\x01\x01')
+        self.assertEqual(make_address_mask(1, 0, 1, False), b'\x01\x01')
+
+        # with nets, it becomes difficult
+        # to use the straight universe number
+        self.assertEqual(make_address_mask(25736), b'\x88d')
+        self.assertEqual(make_address_mask(8, 8, 100, False), b'\x88d')
+
+        # Test clamp min
+        self.assertEqual(make_address_mask(0), b'\x00\x00')
+        self.assertEqual(make_address_mask(-15), b'\x00\x00')
+
+        # Test clamp max
+        self.assertEqual(make_address_mask(32767), b'\xff\x7f')
+        self.assertEqual(make_address_mask(15, 15, 256, False), b'\xff\x7f')
+        self.assertEqual(make_address_mask(999999), b'\xff\x7f')
+        self.assertEqual(make_address_mask(99, 99, 300, False), b'\xff\x7f')
 
         return True
 

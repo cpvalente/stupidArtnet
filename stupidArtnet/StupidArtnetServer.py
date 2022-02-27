@@ -128,6 +128,8 @@ class StupidArtnetServer():
         for listener in self.listeners:
             if listener.get('id') == listener_id:
                 return listener.get('buffer')
+        print("Buffer object not found")
+        return []
 
         print("No Listener with given id found")
         return []

@@ -21,8 +21,37 @@ def shift_this(number, high_first=True):
     return((low, high))
 
 
+def clamp(number, min_val, max_val):
+    """Utility method: sets number in defined range.
+
+    Args:
+    number - number to use
+    range_min - lowest possible number
+    range_max - highest possible number
+
+    Returns:
+    number - number in correct range
+    """
+    return max(min_val, min(number, max_val))
+
+
+def set_even(number):
+    """Utility method: ensures number is even by adding.
+
+    Args:
+    number - number to make even
+
+    Returns:
+    number - even number
+    """
+    if number % 2 != 0:
+        number += 1
+    return number
+
+
 def put_in_range(number, range_min, range_max, make_even=True):
     """Utility method: sets number in defined range.
+    DEPRECATED: this will be removed from the library
 
     Args:
     number - number to use
@@ -34,9 +63,9 @@ def put_in_range(number, range_min, range_max, make_even=True):
     number - number in correct range
 
     """
-    number = max(range_min, min(number, range_max))
-    if (make_even and number % 2 != 0):
-        number += 1
+    number = clamp(number, range_min, range_max)
+    if make_even:
+        number = set_even(number)
     return number
 
 
@@ -58,7 +87,7 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
 
     if is_simplified:
         # Ensure data is in right range
-        universe = max(0, min(universe, 15))
+        universe = clamp(universe, 0, 32767)
 
         # Make mask
         msb, lsb = shift_this(universe)  # convert to MSB / LSB
@@ -66,9 +95,9 @@ def make_address_mask(universe, sub=0, net=0, is_simplified=True):
         address_mask.append(msb)
     else:
         # Ensure data is in right range
-        universe = max(0, min(universe, 15))
-        sub = max(0, min(sub, 15))
-        net = max(0, min(sub, 127))
+        universe = clamp(universe, 0, 15)
+        sub = clamp(sub, 0, 15)
+        net = clamp(net, 0, 127)
 
         # Make mask
         address_mask.append(sub << 4 | universe)
