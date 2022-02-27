@@ -124,10 +124,11 @@ The spec for Artnet 4 applies here: 128 Nets contain 16 Subnets which contain 16
 # Create a StupidArtnet instance with the relevant values
 
 # By default universe is simplified to a value between 0 - 255
+# this should suffice for anything not using subnets
 # on sending universe will be masked to two values
 # making the use of subnets invisible
 
-universe = 17
+universe = 17	# equivalent to universe 1 subnet 1
 a = StupidArtnet(target_ip, universe, packet_size)
 
 
