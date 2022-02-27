@@ -1,6 +1,4 @@
-"""
-Provides common functions byte objects
-"""
+"""Provides common functions byte objects."""
 
 
 def shift_this(number, high_first=True):
