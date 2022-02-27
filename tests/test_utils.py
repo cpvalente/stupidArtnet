@@ -69,12 +69,12 @@ class Test(unittest.TestCase):
         self.assertEqual(make_address_mask(3, 6, 0, False),  b'c\x00')
         self.assertEqual(3 + 6 * 16, 99)
 
-        self.assertEqual(make_address_mask(255), b'c\x00')
-        self.assertEqual(make_address_mask(15, 15, 0, False),  b'c\x00')
+        self.assertEqual(make_address_mask(255), b'\xff\x00')
+        self.assertEqual(make_address_mask(15, 15, 0, False),  b'\xff\x00')
         self.assertEqual(15 + 15 * 16, 255)
 
         self.assertEqual(make_address_mask(256), b'\x00\x01')
-        self.assertEqual(make_address_mask(0, 0, 1, False), b'\x7f\x00')
+        self.assertEqual(make_address_mask(0, 0, 1, False), b'\x00\x01')
 
         self.assertEqual(make_address_mask(257), b'\x01\x01')
         self.assertEqual(make_address_mask(1, 0, 1, False), b'\x01\x01')
