@@ -27,7 +27,6 @@ def clamp(number, min_val, max_val):
     Returns:
     number - number in correct range
     """
-
     return max(min_val, min(number, max_val))
 
 
@@ -40,8 +39,7 @@ def set_even(number):
     Returns:
     number - even number
     """
-
-    if (number % 2 != 0):
+    if number % 2 != 0:
         number += 1
     return number
 
@@ -61,7 +59,7 @@ def put_in_range(number, range_min, range_max, make_even=True):
 
     """
     number = clamp(number, range_min, range_max)
-    if (make_even):
+    if make_even:
         number = set_even(number)
     return number
 

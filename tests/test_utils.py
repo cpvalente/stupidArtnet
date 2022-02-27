@@ -48,7 +48,6 @@ class Test(unittest.TestCase):
 
     def test_mask(self):
         """Test mask and assert simplified mode."""
-
         self.assertEqual(make_address_mask(8), b'\x08\x00')
         self.assertEqual(make_address_mask(8, 0, 0, False), b'\x08\x00')
 
