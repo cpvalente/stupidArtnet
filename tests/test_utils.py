@@ -55,9 +55,11 @@ class Test(unittest.TestCase):
         self.assertEqual(make_address_mask(15), b'\x0f\x00')
         self.assertEqual(make_address_mask(15, 0, 0, False),  b'\x0f\x00')
 
+        self.assertEqual(make_address_mask(16), b'\x10\x00')
+        self.assertEqual(make_address_mask(0, 1, 0, False),  b'\x10\x00')
+
         self.assertEqual(make_address_mask(17), b'\x11\x00')
         self.assertEqual(make_address_mask(1, 1, 0, False),  b'\x11\x00')
-        self.assertEqual(1 + 1 * 16, 17)
 
         self.assertEqual(make_address_mask(18), b'\x12\x00')
         self.assertEqual(make_address_mask(2, 1, 0, False),  b'\x12\x00')
@@ -67,17 +69,20 @@ class Test(unittest.TestCase):
         self.assertEqual(make_address_mask(3, 6, 0, False),  b'c\x00')
         self.assertEqual(3 + 6 * 16, 99)
 
-        self.assertEqual(make_address_mask(127), b'\x7f\x00')
+        self.assertEqual(make_address_mask(255), b'c\x00')
+        self.assertEqual(make_address_mask(15, 15, 0, False),  b'c\x00')
+        self.assertEqual(15 + 15 * 16, 255)
+
+        self.assertEqual(make_address_mask(256), b'\x00\x01')
         self.assertEqual(make_address_mask(0, 0, 1, False), b'\x7f\x00')
-        self.assertEqual(0 + 0 + 1 * 127, 127)
 
-        self.assertEqual(make_address_mask(128), b'\x80\x00')
-        self.assertEqual(make_address_mask(1, 0, 1, False), b'\x80\x00')
-        self.assertEqual(1 + 0 + 1 * 127, 128)
+        self.assertEqual(make_address_mask(257), b'\x01\x01')
+        self.assertEqual(make_address_mask(1, 0, 1, False), b'\x01\x01')
 
-        self.assertEqual(make_address_mask(12836), b'\x01\x01')
+        # with nets, it becomes difficult
+        # to use the straight universe number
+        self.assertEqual(make_address_mask(25736), b'\x88d')
         self.assertEqual(make_address_mask(8, 8, 100, False), b'\x88d')
-        self.assertEqual(8 + 8 * 16 + 100 * 127, 12836)
 
         # Test clamp min
         self.assertEqual(make_address_mask(0), b'\x00\x00')
