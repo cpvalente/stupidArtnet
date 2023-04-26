@@ -50,11 +50,17 @@ class StupidArtnetServer():
 
                     # is it the address we are listening to
                     if listener['address_mask'] == data[14:16]:
-                        listener['buffer'] = list(data)[18:]
 
-                        # check for registered callbacks
-                        if listener['callback'] is not None:
-                            listener['callback'](listener['buffer'])
+                        # check if the packet we've received is old
+                        new_seq = data[12]
+                        if new_seq == 0x00 or new_seq > listener['sequence'] or listener['sequence'] - new_seq > 0x80: # if there's a >50% packet loss it's not our problem
+                            listener['sequence'] = new_seq
+
+                            listener['buffer'] = list(data)[18:]
+
+                            # check for registered callbacks
+                            if listener['callback'] is not None:
+                                listener['callback'](listener['buffer'])
 
     def __del__(self):
         """Graceful shutdown."""
@@ -88,7 +94,8 @@ class StupidArtnetServer():
             'simplified': is_simplified,
             'address_mask': make_address_mask(universe, sub, net, is_simplified),
             'callback': callback_function,
-            'buffer': []
+            'buffer': [],
+            'sequence': 0
         }
 
         self.listeners.append(new_listener)
