@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setup(name='stupidArtnet',
       author='cpvalente',
-      version='1.3.0',
+      version='1.4.0',
       license='MIT',
       description='(Very) Simple implementation of the Art-Net protocol',
       long_description=long_description,
