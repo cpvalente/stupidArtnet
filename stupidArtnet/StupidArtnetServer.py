@@ -11,6 +11,7 @@ NOTES
 
 import socket
 from threading import Thread
+from inspect import signature
 from stupidArtnet.ArtnetUtils import make_address_mask
 
 
@@ -50,11 +51,30 @@ class StupidArtnetServer():
 
                     # is it the address we are listening to
                     if listener['address_mask'] == data[14:16]:
-                        listener['buffer'] = list(data)[18:]
 
-                        # check for registered callbacks
-                        if listener['callback'] is not None:
-                            listener['callback'](listener['buffer'])
+                        # check if the packet we've received is old
+                        new_seq = data[12]
+                        old_seq = listener['sequence']
+                        # if there's a >50% packet loss it's not our problem
+                        if new_seq == 0x00 or new_seq > old_seq or old_seq - new_seq > 0x80:
+                            listener['sequence'] = new_seq
+
+                            listener['buffer'] = list(data)[18:]
+
+                            # check for registered callbacks
+                            callback = listener['callback']
+                            if callback is not None:
+
+                                # choose the correct callback call based
+                                # on the number of the function's parameters
+                                params = signature(callback).parameters
+                                params_len = len(params)
+                                if params_len == 1:
+                                    callback(listener['buffer'])
+                                elif params_len == 2:
+                                    addr_mask = listener['address_mask']
+                                    addr = int.from_bytes(addr_mask, byteorder = 'little')
+                                    callback(listener['buffer'], addr)
 
     def __del__(self):
         """Graceful shutdown."""
@@ -88,7 +108,8 @@ class StupidArtnetServer():
             'simplified': is_simplified,
             'address_mask': make_address_mask(universe, sub, net, is_simplified),
             'callback': callback_function,
-            'buffer': []
+            'buffer': [],
+            'sequence': 0
         }
 
         self.listeners.append(new_listener)
@@ -129,9 +150,6 @@ class StupidArtnetServer():
             if listener.get('id') == listener_id:
                 return listener.get('buffer')
         print("Buffer object not found")
-        return []
-
-        print("No Listener with given id found")
         return []
 
     def clear_buffer(self, listener_id):
