@@ -54,21 +54,27 @@ class StupidArtnetServer():
 
                         # check if the packet we've received is old
                         new_seq = data[12]
-                        if new_seq == 0x00 or new_seq > listener['sequence'] or listener['sequence'] - new_seq > 0x80: # if there's a >50% packet loss it's not our problem
+                        old_seq = listener['sequence']
+                        # if there's a >50% packet loss it's not our problem
+                        if new_seq == 0x00 or new_seq > old_seq or old_seq - new_seq > 0x80:
                             listener['sequence'] = new_seq
 
                             listener['buffer'] = list(data)[18:]
 
                             # check for registered callbacks
-                            if listener['callback'] is not None:
+                            callback = listener['callback']
+                            if callback is not None:
 
-                                # choose the correct callback call based on the number of the function's parameters
-                                params_len = len(signature(listener['callback']).parameters)
+                                # choose the correct callback call based
+                                # on the number of the function's parameters
+                                params = signature(callback).parameters
+                                params_len = len(params)
                                 if params_len == 1:
-                                    listener['callback'](listener['buffer'])
+                                    callback(listener['buffer'])
                                 elif params_len == 2:
-                                    listener['callback'](listener['buffer'], listener['address_mask'])
-                                
+                                    addr_mask = listener['address_mask']
+                                    addr = int.from_bytes(addr_mask, byteorder = 'little')
+                                    callback(listener['buffer'], addr)
 
     def __del__(self):
         """Graceful shutdown."""
