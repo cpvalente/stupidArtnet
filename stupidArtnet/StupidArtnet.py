@@ -20,7 +20,7 @@ class StupidArtnet():
     UDP_PORT = 6454
 
     def __init__(self, target_ip='127.0.0.1', universe=0, packet_size=512, fps=30,
-                 even_packet_size=True, broadcast=False):
+                 even_packet_size=True, broadcast=False, source_address=None):
         """Initializes Art-Net Client.
 
         Args:
@@ -56,6 +56,11 @@ class StupidArtnet():
         if broadcast:
             self.socket_client.setsockopt(
                 socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+        if source_address:
+            self.socket_client.setsockopt(
+                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.socket_client.bind(source_address)
 
         # Timer
         self.fps = fps
