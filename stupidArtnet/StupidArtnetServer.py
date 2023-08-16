@@ -182,8 +182,7 @@ class StupidArtnetServer():
 
     def close(self):
         """Close UDP socket."""
-        self.listen = False         # Set flag
-        self.server_thread.join()              # Terminate thread once jobs are complete
+        self.listen = False         # Set flag, so thread will exit
 
     @staticmethod
     def validate_header(header):
