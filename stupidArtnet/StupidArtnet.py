@@ -147,7 +147,7 @@ class StupidArtnet():
         """Starts thread clock."""
         self.show()
         sleep((1000.0 / self.fps) / 1000.0)
-        _thread.start_new_thread(self.start, tuple())
+        _thread.start_new_thread(self.start, ())
 
     def stop(self):
         """Stops thread clock."""

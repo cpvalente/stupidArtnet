@@ -27,7 +27,7 @@ class StupidArtnetServer():
         # server active flag
         self.listen = True
 
-        self.server_thread = _thread.start_new_thread(self.__init_socket, tuple())
+        self.server_thread = _thread.start_new_thread(self.__init_socket, ())
 
     def __init_socket(self):
         """Initializes server socket."""
