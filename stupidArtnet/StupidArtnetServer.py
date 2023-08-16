@@ -11,7 +11,6 @@ NOTES
 
 import socket
 import _thread
-from inspect import signature
 from stupidArtnet.ArtnetUtils import make_address_mask
 
 
@@ -65,8 +64,13 @@ class StupidArtnetServer():
                             if callback is not None:
                                 # choose the correct callback call based
                                 # on the number of the function's parameters
-                                params = signature(callback).parameters
-                                params_len = len(params)
+                                try:
+                                    from inspect import signature
+                                    params = signature(callback).parameters
+                                    params_len = len(params)
+                                except ImportError:
+                                    params_len = 2
+                                
                                 if params_len == 1:
                                     callback(listener['buffer'])
                                 elif params_len == 2:
