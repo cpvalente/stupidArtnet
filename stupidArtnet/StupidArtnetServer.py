@@ -10,7 +10,7 @@ NOTES
 """
 
 import socket
-from threading import Thread
+import _thread
 from inspect import signature
 from stupidArtnet.ArtnetUtils import make_address_mask
 
@@ -28,8 +28,7 @@ class StupidArtnetServer():
         # server active flag
         self.listen = True
 
-        self.server_thread = Thread(target=self.__init_socket, daemon=True)
-        self.server_thread.start()
+        self.server_thread = _thread.start_new_thread(self.__init_socket, tuple())
 
     def __init_socket(self):
         """Initializes server socket."""
