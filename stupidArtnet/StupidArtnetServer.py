@@ -63,7 +63,7 @@ class StupidArtnetServer():
                             callback = listener['callback']
                             if callback is not None:
                                 addr_mask = listener['address_mask']
-                                addr = int.from_bytes(addr_mask, byteorder = 'little')
+                                addr = int.from_bytes(addr_mask, 'little')
                                 callback(listener['buffer'], addr)
 
     def __del__(self):
