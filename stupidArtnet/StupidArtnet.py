@@ -44,6 +44,7 @@ class StupidArtnet():
         self.net = 0
         self.packet_size = put_in_range(packet_size, 2, 512, even_packet_size)
         self.packet_header = bytearray()
+        self.artsync_header = bytearray()
         self.buffer = bytearray(self.packet_size)
 
         self.make_even = even_packet_size
@@ -61,12 +62,15 @@ class StupidArtnet():
         self.fps = fps
         self.__clock = None
 
-        self.make_header()
+        self.make_artdmx_header()
+        self.make_artsync_header()
+
 
     def __del__(self):
         """Graceful shutdown."""
         self.stop()
         self.close()
+
 
     def __str__(self):
         """Printable object state."""
@@ -82,7 +86,8 @@ class StupidArtnet():
 
         return state
 
-    def make_header(self):
+
+    def make_artdmx_header(self):
         """Make packet header."""
         # 0 - id (7 x bytes + Null)
         self.packet_header = bytearray()
@@ -125,6 +130,38 @@ class StupidArtnet():
         self.packet_header.append(msb)
         self.packet_header.append(lsb)
 
+
+    def make_artsync_header(self):
+        """Make ArtSync header"""
+        self.artsync_header = bytearray()  # Initialize as empty bytearray
+        # ID: Array of 8 characters, the final character is a null termination.
+        self.artsync_header.extend(bytearray('Art-Net', 'utf8'))
+        self.artsync_header.append(0x0)
+        # OpCode: Defines the class of data within this UDP packet. Transmitted low byte first.
+        self.artsync_header.append(0x00)
+        self.artsync_header.append(0x52)
+        # ProtVerHi and ProtVerLo: Art-Net protocol revision number. Current value =14.
+        # Controllers should ignore communication with nodes using a protocol version lower than =14.
+        self.artsync_header.append(0x0)
+        self.artsync_header.append(14)
+        # Aux1 and Aux2: Should be transmitted as zero.
+        self.artsync_header.append(0x0)
+        self.artsync_header.append(0x0)
+
+
+    def send_artsync(self):
+        """Send Artsync"""
+        self.make_artsync_header()
+        packet = bytearray()
+        packet.extend(self.artsync_header)
+        try:
+            self.socket_client.sendto(packet, (self.target_ip, self.UDP_PORT))
+        except socket.error as error:
+            print(f"ERROR: Socket error with exception: {error}")
+        finally:
+            self.sequence = (self.sequence + 1) % 256
+            
+            
     def show(self):
         """Finally send data."""
         packet = bytearray()
@@ -136,6 +173,7 @@ class StupidArtnet():
             print(f"ERROR: Socket error with exception: {error}")
         finally:
             self.sequence = (self.sequence + 1) % 256
+
 
     def close(self):
         """Close UDP socket."""
@@ -149,6 +187,7 @@ class StupidArtnet():
         self.__clock = Timer((1000.0 / self.fps) / 1000.0, self.start)
         self.__clock.daemon = True
         self.__clock.start()
+
 
     def stop(self):
         """Stops thread clock."""
@@ -169,7 +208,8 @@ class StupidArtnet():
             self.universe = put_in_range(universe, 0, 255, False)
         else:
             self.universe = put_in_range(universe, 0, 15, False)
-        self.make_header()
+        self.make_artdmx_header()
+
 
     def set_subnet(self, sub):
         """Setter for subnet address (0 - 15).
@@ -177,7 +217,8 @@ class StupidArtnet():
         Set simplify to false to use
         """
         self.subnet = put_in_range(sub, 0, 15, False)
-        self.make_header()
+        self.make_artdmx_header()
+
 
     def set_net(self, net):
         """Setter for net address (0 - 127).
@@ -185,12 +226,13 @@ class StupidArtnet():
         Set simplify to false to use
         """
         self.net = put_in_range(net, 0, 127, False)
-        self.make_header()
+        self.make_artdmx_header()
+
 
     def set_packet_size(self, packet_size):
         """Setter for packet size (2 - 512, even only)."""
         self.packet_size = put_in_range(packet_size, 2, 512, self.make_even)
-        self.make_header()
+        self.make_artdmx_header()
 
     # SETTERS - DATA #
 
@@ -198,12 +240,14 @@ class StupidArtnet():
         """Clear DMX buffer."""
         self.buffer = bytearray(self.packet_size)
 
+
     def set(self, value):
         """Set buffer."""
         if len(value) != self.packet_size:
             print("ERROR: packet does not match declared packet size")
             return
         self.buffer = value
+
 
     def set_16bit(self, address, value, high_first=False):
         """Set single 16bit value in DMX buffer."""
@@ -223,6 +267,7 @@ class StupidArtnet():
             self.buffer[address - 1] = (value) & 0xFF				# low
             self.buffer[address] = (value >> 8) & 0xFF  # high
 
+
     def set_single_value(self, address, value):
         """Set single value in DMX buffer."""
         if address > self.packet_size:
@@ -232,6 +277,7 @@ class StupidArtnet():
             print("ERROR: Address out of range")
             return
         self.buffer[address - 1] = put_in_range(value, 0, 255, False)
+
 
     def set_single_rem(self, address, value):
         """Set single value while blacking out others."""
@@ -243,6 +289,7 @@ class StupidArtnet():
             return
         self.clear()
         self.buffer[address - 1] = put_in_range(value, 0, 255, False)
+
 
     def set_rgb(self, address, red, green, blue):
         """Set RGB from start address."""
@@ -268,6 +315,7 @@ class StupidArtnet():
         self.set(packet)
         self.show()
 
+
     def set_simplified(self, simplify):
         """Builds Header accordingly.
 
@@ -279,20 +327,24 @@ class StupidArtnet():
         if simplify == self.is_simplified:
             return
         self.is_simplified = simplify
-        self.make_header()
+        self.make_artdmx_header()
+
 
     def see_header(self):
         """Show header values."""
         print(self.packet_header)
 
+
     def see_buffer(self):
         """Show buffer values."""
         print(self.buffer)
+
 
     def blackout(self):
         """Sends 0's all across."""
         self.clear()
         self.show()
+
 
     def flash_all(self, delay=None):
         """Sends 255's all across."""
@@ -331,6 +383,10 @@ if __name__ == '__main__':
     a.show()
 
     print("Values sent")
+    
+    a.send_artsync()
+
+    print("ArtSync sent")
 
     # Cleanup when you are done
     del a
