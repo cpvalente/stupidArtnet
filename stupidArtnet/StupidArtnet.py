@@ -158,7 +158,7 @@ class StupidArtnet():
             self.socket_client.sendto(packet, (self.target_ip, self.UDP_PORT))
         except socket.error as error:
             print(f"ERROR: Socket error with exception: {error}")
-        finally:
+
             
     def show(self):
         """Finally send data."""
