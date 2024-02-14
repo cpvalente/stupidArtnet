@@ -159,8 +159,6 @@ class StupidArtnet():
         except socket.error as error:
             print(f"ERROR: Socket error with exception: {error}")
         finally:
-            self.sequence = (self.sequence + 1) % 256
-            
             
     def show(self):
         """Finally send data."""
