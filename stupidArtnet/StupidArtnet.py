@@ -20,7 +20,7 @@ class StupidArtnet():
     UDP_PORT = 6454
 
     def __init__(self, target_ip='127.0.0.1', universe=0, packet_size=512, fps=30,
-                 even_packet_size=True, broadcast=False):
+                 even_packet_size=True, broadcast=False, artsync=False):
         """Initializes Art-Net Client.
 
         Args:
@@ -30,6 +30,7 @@ class StupidArtnet():
         fps - transmition rate
         even_packet_size - Some receivers enforce even packets
         broadcast - whether to broadcast in local sub
+        artsync - if we want to synchronize buffer
 
         Returns:
         None
@@ -41,10 +42,10 @@ class StupidArtnet():
         self.physical = 0
         self.universe = universe
         self.subnet = 0
+        self.if_sync = artsync
         self.net = 0
         self.packet_size = put_in_range(packet_size, 2, 512, even_packet_size)
         self.packet_header = bytearray()
-        self.artsync_header = bytearray()
         self.buffer = bytearray(self.packet_size)
 
         self.make_even = even_packet_size
@@ -63,7 +64,10 @@ class StupidArtnet():
         self.__clock = None
 
         self.make_artdmx_header()
-        self.make_artsync_header()
+        
+        if self.if_sync:
+            self.artsync_header = bytearray()
+            self.make_artsync_header()
 
 
     def __del__(self):
@@ -152,14 +156,12 @@ class StupidArtnet():
     def send_artsync(self):
         """Send Artsync"""
         self.make_artsync_header()
-        packet = bytearray()
-        packet.extend(self.artsync_header)
         try:
-            self.socket_client.sendto(packet, (self.target_ip, self.UDP_PORT))
+            self.socket_client.sendto(self.artsync_header, (self.target_ip, self.UDP_PORT))
         except socket.error as error:
             print(f"ERROR: Socket error with exception: {error}")
 
-            
+
     def show(self):
         """Finally send data."""
         packet = bytearray()
@@ -167,6 +169,8 @@ class StupidArtnet():
         packet.extend(self.buffer)
         try:
             self.socket_client.sendto(packet, (self.target_ip, self.UDP_PORT))
+            if self.if_sync:  # if we want to send artsync
+                self.send_artsync()
         except socket.error as error:
             print(f"ERROR: Socket error with exception: {error}")
         finally:
@@ -361,7 +365,7 @@ if __name__ == '__main__':
     UNIVERSE_TO_SEND = 15           # see docs
     PACKET_SIZE = 20                # it is not necessary to send whole universe
 
-    a = StupidArtnet(TARGET_IP, UNIVERSE_TO_SEND, PACKET_SIZE)
+    a = StupidArtnet(TARGET_IP, UNIVERSE_TO_SEND, PACKET_SIZE, artsync=True)
     a.set_simplified(False)
     a.set_net(129)
     a.set_subnet(16)
@@ -381,10 +385,6 @@ if __name__ == '__main__':
     a.show()
 
     print("Values sent")
-    
-    a.send_artsync()
-
-    print("ArtSync sent")
 
     # Cleanup when you are done
     del a
