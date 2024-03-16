@@ -3,7 +3,7 @@
 
 # StupidArtnet
 
-(Very) Simple Art-Net implementation in Python
+(Very) Simple Art-Net implementation in Python (compatible with micro python)
 
 #### Table of Contents
 - [Installing from github](#installing-from-github)
