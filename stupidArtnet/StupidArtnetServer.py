@@ -10,8 +10,7 @@ NOTES
 """
 
 import socket
-from threading import Thread
-from inspect import signature
+import _thread
 from stupidArtnet.ArtnetUtils import make_address_mask
 
 
@@ -28,8 +27,7 @@ class StupidArtnetServer():
         # server active flag
         self.listen = True
 
-        self.server_thread = Thread(target=self.__init_socket, daemon=True)
-        self.server_thread.start()
+        self.server_thread = _thread.start_new_thread(self.__init_socket, ())
 
     def __init_socket(self):
         """Initializes server socket."""
@@ -64,16 +62,20 @@ class StupidArtnetServer():
                             # check for registered callbacks
                             callback = listener['callback']
                             if callback is not None:
-
                                 # choose the correct callback call based
                                 # on the number of the function's parameters
-                                params = signature(callback).parameters
-                                params_len = len(params)
+                                try:
+                                    from inspect import signature
+                                    params = signature(callback).parameters
+                                    params_len = len(params)
+                                except ImportError:
+                                    params_len = 2
+                                
                                 if params_len == 1:
                                     callback(listener['buffer'])
                                 elif params_len == 2:
                                     addr_mask = listener['address_mask']
-                                    addr = int.from_bytes(addr_mask, byteorder = 'little')
+                                    addr = int.from_bytes(addr_mask, 'little')
                                     callback(listener['buffer'], addr)
 
     def __del__(self):
@@ -180,8 +182,7 @@ class StupidArtnetServer():
 
     def close(self):
         """Close UDP socket."""
-        self.listen = False         # Set flag
-        self.server_thread.join()              # Terminate thread once jobs are complete
+        self.listen = False         # Set flag, so thread will exit
 
     @staticmethod
     def validate_header(header):

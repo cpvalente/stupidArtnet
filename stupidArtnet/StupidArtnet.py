@@ -9,7 +9,7 @@ NOTES
 """
 
 import socket
-from threading import Timer
+import _thread
 from time import sleep
 from stupidArtnet.ArtnetUtils import shift_this, put_in_range
 
@@ -186,15 +186,16 @@ class StupidArtnet():
     def start(self):
         """Starts thread clock."""
         self.show()
-        self.__clock = Timer((1000.0 / self.fps) / 1000.0, self.start)
-        self.__clock.daemon = True
-        self.__clock.start()
+        if not hasattr(self, "running"):
+            self.running = True
+        elif self.running:
+            sleep((1000.0 / self.fps) / 1000.0)
+            _thread.start_new_thread(self.start, ())
 
 
     def stop(self):
-        """Stops thread clock."""
-        if self.__clock is not None:
-            self.__clock.cancel()
+        """Set flag so thread will exit."""
+        self.running = False
 
     # SETTERS - HEADER #
 
