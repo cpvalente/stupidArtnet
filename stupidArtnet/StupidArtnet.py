@@ -194,7 +194,7 @@ class StupidArtnet():
         self.show()
         if not hasattr(self, "running"):
             self.running = True
-        elif self.running:
+        if self.running:
             sleep((1000.0 / self.fps) / 1000.0)
             _thread.start_new_thread(self.start, ())
 
