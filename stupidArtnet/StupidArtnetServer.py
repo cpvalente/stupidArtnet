@@ -17,13 +17,13 @@ from stupidArtnet.ArtnetUtils import make_address_mask
 class StupidArtnetServer():
     """(Very) simple implementation of an Artnet Server."""
 
-    UDP_PORT = 6454
     socket_server = None
     ARTDMX_HEADER = b'Art-Net\x00\x00P\x00\x0e'
     listeners = []
 
-    def __init__(self):
+    def __init__(self, port=6454):
         """Initializes Art-Net server."""
+        self.port = port  # Use provided port or default
         # server active flag
         self.listen = True
 
@@ -35,7 +35,7 @@ class StupidArtnetServer():
         self.socket_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket_server.setsockopt(
             socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket_server.bind(('', self.UDP_PORT))  # Listen on any valid IP
+        self.socket_server.bind(('', self.port))  # Listen on any valid IP
 
         while self.listen:
 
