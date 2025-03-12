@@ -29,7 +29,7 @@ class StupidArtnet():
         even_packet_size - Some receivers enforce even packets
         broadcast - whether to broadcast in local sub
         artsync - if we want to synchronize buffer
-        port - port to listen
+        port - UDP port used to send Art-Net packets (default: 6454)
 
         Returns:
         None
@@ -46,7 +46,11 @@ class StupidArtnet():
         self.packet_size = put_in_range(packet_size, 2, 512, even_packet_size)
         self.packet_header = bytearray()
         self.buffer = bytearray(self.packet_size)
-        self.port = port  # Use provided port or default
+        self.port = port  
+        # Use provided port or default 6454
+        # By default, the server uses port 6454, no need to specify it.
+        # If you need to change the Art-Net port, ensure the port is within the valid range for UDP ports (1024-65535).
+        # Be sure that no other application is using the selected port on your network.
 
         self.make_even = even_packet_size
 

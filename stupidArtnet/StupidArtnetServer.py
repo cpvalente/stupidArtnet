@@ -24,6 +24,10 @@ class StupidArtnetServer():
     def __init__(self, port=6454):
         """Initializes Art-Net server."""
         self.port = port  # Use provided port or default
+        # By default, the server uses port 6454, no need to specify it.
+        # If you need to change the Art-Net port, ensure the port is within the valid range for UDP ports (1024-65535).
+        # Be sure that no other application is using the selected port on your network.
+        
         # server active flag
         self.listen = True
 
