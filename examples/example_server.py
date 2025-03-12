@@ -17,10 +17,17 @@ def test_callback(data):
 # setSimplified     = DEFAULT True
 # callback_function = DEFAULT None
 
-
 # You can use universe only
-universe = 1
-a = StupidArtnetServer()
+universe = 0
+
+# By default, the server uses port 6454, no need to specify it.
+# If you need to change the Art-Net port, ensure the port is within the valid range for UDP ports (1024-65535)
+# Be sure that no other application is using the selected port on your network.
+# To specify a different port, for example port 6455, you can do it like this:
+# a = StupidArtnetServer(port=6455)  # Change 6455 to any valid port number between 1024 and 65535.
+
+a = StupidArtnetServer() #Create a server with the default port 6454
+
 
 # For every universe we would like to receive,
 # add a new listener with a optional callback

@@ -17,10 +17,8 @@ from stupidArtnet.ArtnetUtils import shift_this, put_in_range
 class StupidArtnet():
     """(Very) simple implementation of Artnet."""
 
-    UDP_PORT = 6454
-
     def __init__(self, target_ip='127.0.0.1', universe=0, packet_size=512, fps=30,
-                 even_packet_size=True, broadcast=False, source_address=None, artsync=False):
+                 even_packet_size=True, broadcast=False, source_address=None, artsync=False, port=6454):
         """Initializes Art-Net Client.
 
         Args:
@@ -31,6 +29,7 @@ class StupidArtnet():
         even_packet_size - Some receivers enforce even packets
         broadcast - whether to broadcast in local sub
         artsync - if we want to synchronize buffer
+        port - UDP port used to send Art-Net packets (default: 6454)
 
         Returns:
         None
@@ -47,6 +46,11 @@ class StupidArtnet():
         self.packet_size = put_in_range(packet_size, 2, 512, even_packet_size)
         self.packet_header = bytearray()
         self.buffer = bytearray(self.packet_size)
+        self.port = port  
+        # Use provided port or default 6454
+        # By default, the server uses port 6454, no need to specify it.
+        # If you need to change the Art-Net port, ensure the port is within the valid range for UDP ports (1024-65535).
+        # Be sure that no other application is using the selected port on your network.
 
         self.make_even = even_packet_size
 
@@ -86,7 +90,7 @@ class StupidArtnet():
         """Printable object state."""
         state = "===================================\n"
         state += "Stupid Artnet initialized\n"
-        state += f"Target IP: {self.target_ip} : {self.UDP_PORT} \n"
+        state += f"Target IP: {self.target_ip} : {self.port} \n"
         state += f"Universe: {self.universe} \n"
         if not self.is_simplified:
             state += f"Subnet: {self.subnet} \n"
@@ -163,7 +167,7 @@ class StupidArtnet():
         """Send Artsync"""
         self.make_artsync_header()
         try:
-            self.socket_client.sendto(self.artsync_header, (self.target_ip, self.UDP_PORT))
+            self.socket_client.sendto(self.artsync_header, (self.target_ip, self.port))
         except socket.error as error:
             print(f"ERROR: Socket error with exception: {error}")
 
@@ -174,7 +178,7 @@ class StupidArtnet():
         packet.extend(self.packet_header)
         packet.extend(self.buffer)
         try:
-            self.socket_client.sendto(packet, (self.target_ip, self.UDP_PORT))
+            self.socket_client.sendto(packet, (self.target_ip, self.port))
             if self.if_sync:  # if we want to send artsync
                 self.send_artsync()
         except socket.error as error:

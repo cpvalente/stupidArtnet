@@ -3,10 +3,9 @@ import time
 import random
 
 # THESE ARE MOST LIKELY THE VALUES YOU WILL BE NEEDING
-target_ip = '255.255.255.255'		# typically in 2.x or 10.x range
+target_ip = '127.0.0.1'		# typically in 2.x or 10.x range
 universe = 0 										# see docs
 packet_size = 100								# it is not necessary to send whole universe
-
 # CREATING A STUPID ARTNET OBJECT
 # SETUP NEEDS A FEW ELEMENTS
 # TARGET_IP   = DEFAULT 127.0.0.1
@@ -14,7 +13,14 @@ packet_size = 100								# it is not necessary to send whole universe
 # PACKET_SIZE = DEFAULT 512
 # FRAME_RATE  = DEFAULT 30
 # ISBROADCAST = DEFAULT FALSE
-a = StupidArtnet(target_ip, universe, packet_size, 30, True, True)
+
+# By default, the server uses port 6454, no need to specify it.
+# If you need to change the Art-Net port, ensure the port is within the valid range for UDP ports (1024-65535).
+# Be sure that no other application is using the selected port on your network.
+# To specify a different port, for example port 6455, you can do it like this:
+# a = StupidArtnetServer(target_ip, universe, packet_size, 30, True, True, port=6455 )  # Change 6455 to any valid port number between 1024 and 65535.
+
+a = StupidArtnet( target_ip, universe, packet_size, 30, True, True )
 
 # MORE ADVANCED CAN BE SET WITH SETTERS IF NEEDED
 # NET         = DEFAULT 0
